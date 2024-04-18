@@ -1,2 +1,2 @@
 # blockchain-project
-![Dogs Typing](https://media.giphy.com/media/Dh5q0sShxgp13DwrvG/giphy.gif)
+![Dogs Typing](https://media.giphy.com/media/oBQZIgNobc7ewVWvCd/giphy.gif)
