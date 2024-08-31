@@ -6,3 +6,4 @@ const rpcURL = "http://localhost:7545";
 
 // Create web3 object
 const web3 = new Web3(rpcURL);
+
