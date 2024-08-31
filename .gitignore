@@ -1,5 +1,6 @@
 .vscode
 contracts/artifacts
 node_modules
+tests
 
 package-lock.json
