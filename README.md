@@ -34,6 +34,6 @@ First, clone this repository by running `git clone https://github.com/christians
 ## Running Tests
 
 1. Navigate to the [tests](tests) folder.
-2. Run `npx hardhat test`
+2. Run `npx hardhat test` or `npx mocha`
 
 
