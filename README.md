@@ -27,7 +27,10 @@ First, clone this repository by running `git clone https://github.com/christians
 
 # Getting Started
 
+## Running Tests
+
 1. Start the workspace you just created in Ganache.
 2. In the Remix IDE, click on `Solidity Compiler` in the left sidebar and compile the contract using version `0.8.19`.
 3. Next, click on `Deploy & Run Transactions` in the left sidebar and select `Custom - External Http Provider` as the environment. In the popup window, enter the Ganache RPC server URL of your workspace, for example, `http://127.0.0.1:7545`.
+
 

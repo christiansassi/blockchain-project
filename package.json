@@ -1,7 +1,10 @@
 {
+    "type": "module",
     "dependencies": {
+        "@nomiclabs/hardhat-ethers": "^2.2.3",
         "chai": "^5.1.1",
-        "hardhat": "^2.22.9",
+        "ethers": "^5.7.2",
+        "mocha": "^10.7.3",
         "web3": "^4.12.1"
     }
 }
