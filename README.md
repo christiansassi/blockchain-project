@@ -36,7 +36,7 @@ First, clone this repository by running `git clone https://github.com/christians
 You can run one of the following commands:
 
 ```bash
-# Use this command if you want to remove any previously compiled files (if any) and rebuild them before running the tests
+# To remove any previously compiled files (if any) and rebuild them before running the tests
 npm run test:clean
 
 # Use this command if you just want to run the tests. 
