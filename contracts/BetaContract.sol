@@ -33,7 +33,7 @@ contract BetaContract {
         uint price; // Product price
         uint id; // Order id
         uint time; // Order time
-        uint warrantyTime; // Warranty time
+        uint expiryDate; // Expiry date
 
         RefundState refundState;
 
@@ -77,13 +77,16 @@ contract BetaContract {
     * @param price The cost of the product.
     * @return The ID of the order. This will be used by the buyer to complete the order.
     */
-    function sell(address buyer, uint price, uint warrantyTime) public returns (uint) {
+    function sell(address buyer, uint price, uint expiryDate) public returns (uint) {
     
-        // The buyer cannot be the seller
-        require(buyer != msg.sender, "Invalid buyer address");
+        // Buyer cannot be the seller
+        require(buyer != msg.sender, "Buyer cannot be the seller");
 
         // Price must be greater than zero
         require(price > 0, "Price must be greater than zero");
+
+        // Expiry date must be in the future
+        require(expiryDate > block.timestamp, "Expiry date must be in the future");
 
         // Create a new order
         Order memory order;
@@ -94,7 +97,7 @@ contract BetaContract {
         order.price = price;
         order.id = ++users[msg.sender].latestOrderId;
         // order.time = to be filled in the buy function
-        order.warrantyTime = warrantyTime;
+        order.expiryDate = expiryDate;
 
         order.refundState = RefundState.none;
         
@@ -114,15 +117,15 @@ contract BetaContract {
     * @param price The cost of the product.
     * @param id The ID of the order.
     */
-    function buy(address seller, uint price, uint id, uint warrantyTime) public payable {
+    function buy(address seller, uint price, uint id, uint expiryDate) public payable {
 
-        // The seller cannot sell to themselves
-        require(seller != msg.sender, "Invalid seller address");
+        // Seller cannot be the buyer
+        require(seller != msg.sender, "Seller cannot be the buyer");
 
         // Validate the price
         // Perform this validation before the second price check, as we are not yet accessing the order.
         // This allows us to catch errors early, interrupt the function and save on gas costs.
-        require(price != 0, "Price cannot be zero");
+        require(price != 0, "Price must be greater than zero");
         require(price == msg.value, "Incorrect payment amount sent");
 
         // Retrieve the order
@@ -143,7 +146,7 @@ contract BetaContract {
         require(order.seller == seller, "Seller address does not match");
         require(order.price == price, "Order price does not match");
         require(order.id == id, "Order ID does not match");
-        require(order.warrantyTime == warrantyTime, "Order warranty time does not match");
+        require(order.expiryDate == expiryDate, "Order expiry date does not match");
 
         // Complete the missing information inside the order
         order.time = block.timestamp;
@@ -248,30 +251,17 @@ contract BetaContract {
     }
 
     /**
-     * @dev Support function to timeUntilWithdrawal(uint id) and timeUntilWithdrawal(address seller, uint id)
-     * @param order Order to be checked
-     * @return Time left.
-     */
-    function _timeUntilWithdrawal(Order memory order) private view returns(uint) {
-
-        // Calculate time left
-        int time_left = int(order.time + order.warrantyTime) - int(block.timestamp);
-
-        return (time_left >= 0) ? uint(time_left) : 0;
-    }
-
-    /**
      * @dev Calculates the time left before being able to withdraw an order.
      * @param id Order's ID.
      * @return Time left.
      */
-    function timeUntilWithdrawal(uint id) public view returns(uint){
+    function getExpiryDate(uint id) public view returns(uint){
 
         Order memory order = users[msg.sender].orders[id];
 
         require(order.time != 0, "Order does not exist");
 
-        return _timeUntilWithdrawal(order);
+        return order.expiryDate;
     }
 
     /**
@@ -280,14 +270,14 @@ contract BetaContract {
      * @param id Order's ID.
      * @return Time left.
      */
-    function timeUntilWithdrawal(address seller, uint id) public view returns(uint){
+    function getExpiryDate(address seller, uint id) public view returns(uint){
 
         Order memory order = users[seller].orders[id];
 
         require(order.time != 0, "Order does not exist");
         require(order.buyer == msg.sender, "You are not the buyer for this order");
 
-        return _timeUntilWithdrawal(order);
+        return order.expiryDate;
     }
     
     /**
@@ -316,8 +306,8 @@ contract BetaContract {
             // If a refund has been requested and accepted, it means that funds are destinated to the buyer and only him can set the order as completed
             require(order.refundState != RefundState.accepted, "A refund has been requested and accepted. You cannot collect your order");
 
-            // A seller cannot claim his order before the warranty time
-            require(timeUntilWithdrawal(id) == 0, "You cannot collect your order yet");
+            // A seller cannot claim his order before the expiry date
+            require(order.expiryDate > block.timestamp, "You cannot collect your order yet");
         }
 
         // Set order as completed
