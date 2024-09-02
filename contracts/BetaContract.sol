@@ -40,6 +40,8 @@ contract BetaContract {
         bool completed;
     }
 
+    event OrderIdEvent(uint orderId);
+
     // List of users
     mapping (address => User) users;
 
@@ -102,6 +104,7 @@ contract BetaContract {
         users[msg.sender].orders[order.id] = order;
 
         // Return the order ID. The seller must provide this ID to the buyer.
+        emit OrderIdEvent(order.id);
         return order.id;
     }
 

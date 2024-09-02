@@ -1,5 +1,11 @@
 .vscode
+
 contracts/artifacts
+contracts/cache
+contracts/Lock.sol
+
 node_modules
+
+test/Lock.js
 
 package-lock.json
