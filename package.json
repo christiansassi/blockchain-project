@@ -2,5 +2,10 @@
     "devDependencies": {
         "@nomicfoundation/hardhat-toolbox": "^5.0.0",
         "hardhat": "^2.22.9"
+    },
+
+    "scripts": {
+        "test": "npx hardhat test ./test/tests.js",
+        "test:clean": "npx hardhat clean && npx hardhat compile --force && npx hardhat test ./test/tests.js"
     }
 }
