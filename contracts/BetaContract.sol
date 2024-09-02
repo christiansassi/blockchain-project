@@ -41,6 +41,7 @@ contract BetaContract {
     }
 
     event OrderIdEvent(uint orderId);
+    event OrderStateEvent(bool orderState);
 
     // List of users
     mapping (address => User) users;
@@ -157,12 +158,13 @@ contract BetaContract {
     * @param id The ID of the order.
     * @return The state of the order. True if it is completed, false otherwise.
     */
-    function getOrderState(uint id) public view returns(bool) {
+    function getOrderState(uint id) public returns(bool) {
         
         Order memory order = users[msg.sender].orders[id];
 
         require(order.time != 0, "Order does not exist");
 
+        emit OrderStateEvent(order.completed);
         return order.completed;
     }
 
@@ -172,12 +174,13 @@ contract BetaContract {
     * @param id The ID of the order.
     * @return The state of the order. True if it is completed, false otherwise.
     */
-    function getOrderState(address seller, uint id) public view returns(bool) {
+    function getOrderState(address seller, uint id) public returns(bool) {
         
         Order memory order = users[seller].orders[id];
 
         require(order.buyer == msg.sender, "You are not the buyer for this order"); 
 
+        emit OrderStateEvent(order.completed);
         return order.completed;
     }
 
@@ -197,6 +200,8 @@ contract BetaContract {
         require(order.refundState != RefundState.pending, "A refund has been requested. Wait untill it will be accepted or declined");
         require(order.refundState != RefundState.accepted, "A refund has been requested and accepted");
         require(order.refundState != RefundState.declined, "A refund has been requested and declined");
+
+        require(order.expiryDate > block.timestamp, "Order expired. You cannot collect your order anymore");
 
         // Request refund
         order.refundState = RefundState.pending;
@@ -307,7 +312,7 @@ contract BetaContract {
             require(order.refundState != RefundState.accepted, "A refund has been requested and accepted. You cannot collect your order");
 
             // A seller cannot claim his order before the expiry date
-            require(order.expiryDate > block.timestamp, "You cannot collect your order yet");
+            require(order.expiryDate < block.timestamp, "You cannot collect your order yet");
         }
 
         // Set order as completed
