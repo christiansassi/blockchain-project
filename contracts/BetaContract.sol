@@ -221,6 +221,10 @@ contract BetaContract {
 
         require(order.time != 0, "Order does not exist");
         require(!order.completed, "Order already completed");
+        
+        require(order.refundState != RefundState.none, "No refund has been requested for this order");
+        require(order.refundState != RefundState.accepted, "A refund has already been requested and accepted");
+        require(order.refundState != RefundState.declined, "A refund has already been requested and declined");
 
         // Set new refund state
         order.refundState = newRefundState;
