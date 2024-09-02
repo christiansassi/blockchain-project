@@ -33,7 +33,15 @@ First, clone this repository by running `git clone https://github.com/christians
 
 ## Running Tests
 
-1. Navigate to the [test](test) folder.
-2. Run `npx hardhat test`
+You can run one of the following commands:
+
+```bash
+# Use this command if you want to remove any previously compiled files (if any) and rebuild them before running the tests
+npm run test:clean
+
+# Use this command if you just want to run the tests. 
+# Note that if the contract is not compiled, Hardhat will compile it for you
+npm run test
+
 
 
