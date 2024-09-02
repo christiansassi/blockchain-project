@@ -42,6 +42,4 @@ npm run test:clean
 # Use this command if you just want to run the tests. 
 # Note that if the contract is not compiled, Hardhat will compile it for you
 npm run test
-
-
-
+```
