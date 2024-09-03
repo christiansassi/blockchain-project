@@ -20,7 +20,7 @@ First, clone this repository by running `git clone https://github.com/christians
     
 ### Remix Online IDE
 
-1. Install the npm package by running `npm i -g @remix-project/remixd`
+1. Install the npm package by running `npm install @remix-project/remixd --global`
 2. Start the Remix daemon inside your project directory. Navigate to your project folder and run `remixd -s .`
 3. Open the Remix Online IDE [here](https://remix.ethereum.org/), and in the top-left corner, under the workspace section, select `connect to localhost`.
 
