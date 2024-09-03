@@ -37,7 +37,7 @@ You can run one of the following commands:
 
 ```bash
 # To remove any previously compiled files (if any) and rebuild them before running the tests
-npm run test:clean
+npm run test:build
 
 # To run the tests. 
 # Note that if the contract is not compiled, Hardhat will compile it for you

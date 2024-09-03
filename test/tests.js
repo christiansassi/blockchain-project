@@ -8,6 +8,8 @@ const ETH = ethers.parseEther("1.0"); // 1 ETH in wei
 const CONTRACT_NAME = "BetaContract";
 const ORDER_ID_EVENT = "OrderIdEvent";
 const ORDER_STATE_EVENT = "OrderStateEvent";
+const REFUND_STATE_EVENT = "RefundStateEvent";
+const EXPIRY_DATE_EVENT = "ExpiryDateEvent";
 
 const DAYS_1 = 24 * 60 * 60;
 const MINUTES_1 = 60;
@@ -594,7 +596,6 @@ describe("BetaContract get order state", function () {
 
         // Get the state of the order from a random address
         const randomContract = contract.connect(accounts[2]);
-
         await expect(randomContract["getOrderState(address,uint256)"](seller.address, orderId)).to.be.revertedWith("You are not the buyer for this order");
     });
 
@@ -674,7 +675,6 @@ describe("BetaContract request refund", function () {
         
         // Request a refund from a random address
         const randomContract = contract.connect(accounts[2]);
-
         await expect(randomContract.requestRefund(seller.address, orderId)).to.be.revertedWith("You are not the buyer for this order");
     });
 
@@ -967,7 +967,6 @@ describe("BetaContract update refund state", function () {
     
         // Try to change a refund state with a random account
         const randomContract = contract.connect(accounts[2]);
-
         await expect(randomContract.updateRefundState(accounts[1].address, 1, 2)).to.be.revertedWith("Only the owner can update the state of a refund request");
     });
 
@@ -1189,5 +1188,784 @@ describe("BetaContract update refund state", function () {
 
         // Try to re-change the refund state (accepted)
         await expect(ownerContract.updateRefundState(seller.address, orderId, 2)).to.be.revertedWith("A refund has already been requested and declined");
+    });
+});
+
+describe("BetaContract get refund state", function () {
+
+    it("Should get refund state", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+        
+        // Request a refund
+        await expect(buyerContract.requestRefund(seller.address, orderId)).not.to.be.reverted;
+
+        // Get refund state
+        await expect(buyerContract["getRefundState(address,uint256)"](seller.address, orderId)).to.emit(contract, REFUND_STATE_EVENT).withArgs(1);
+        await expect(sellerContract["getRefundState(uint256)"](orderId)).to.emit(contract, REFUND_STATE_EVENT).withArgs(1);
+    });
+
+    it("You are not the buyer for this order", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+        
+        // Request a refund
+        await expect(buyerContract.requestRefund(seller.address, orderId)).not.to.be.reverted;
+
+        // Get refund state from another address
+        const randomContract = contract.connect(accounts[2]);
+        await expect(randomContract["getRefundState(address,uint256)"](seller.address, orderId)).to.be.revertedWith("You are not the buyer for this order");
+    });
+
+    it("Order does not exist", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set seller
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Get refund state for a non-existing order
+        await expect(sellerContract["getRefundState(uint256)"](0)).to.be.revertedWith("Order does not exist");
+    });
+});
+
+describe("BetaContract get expiry date", function () {
+
+    it("Should get expiry date", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Get expiry date
+        await expect(buyerContract["getExpiryDate(address,uint256)"](seller.address, orderId)).to.emit(contract, EXPIRY_DATE_EVENT).withArgs(expiryDate);
+        await expect(sellerContract["getExpiryDate(uint256)"](orderId)).to.emit(contract, EXPIRY_DATE_EVENT).withArgs(expiryDate);
+    });
+
+    it("You are not the buyer for this order", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Get expiry date from another address
+        const randomContract = contract.connect(accounts[2]);
+        await expect(randomContract["getExpiryDate(address,uint256)"](seller.address, orderId)).to.be.revertedWith("You are not the buyer for this order");
+    });
+
+    it("Order does not exist", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set seller
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Get expiry date for a non-existing order
+        await expect(sellerContract["getExpiryDate(uint256)"](0)).to.be.revertedWith("Order does not exist");
+    });
+});
+
+describe("BetaContract collect order", function () {
+
+    it("Should collect order", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Go forward
+        await network.provider.send("evm_increaseTime", [DAYS_1 * 2]); // Increase time by 2 days
+        await network.provider.send("evm_mine"); // Mine a new block to apply the time increase
+
+        // Collect the order
+        await expect(sellerContract.collectOrder(orderId)).not.to.be.reverted;
+    });
+
+    it("Order does not exist", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set seller
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+
+        // Collect a non-existing order
+        await expect(sellerContract.collectOrder(0)).to.be.revertedWith("Order does not exist");
+    });
+
+    it("A refund has been requested and accepted. You cannot collect your order anymore", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Request a refund
+        await expect(buyerContract.requestRefund(seller.address, orderId)).not.to.be.reverted;
+
+        // Change the refund state (accepted)
+        const ownerContract = buyerContract;
+        await expect(ownerContract.updateRefundState(seller.address, orderId, 2)).not.to.be.reverted;
+
+        // Collect the refund
+        await expect(buyerContract.collectRefund(seller.address, orderId)).not.to.be.reverted;
+
+        // Collect the order
+        await expect(sellerContract.collectOrder(orderId)).to.be.revertedWith("A refund has been requested and accepted. You cannot collect your order anymore");
+    });
+
+    it("Order already completed", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Go forward
+        await network.provider.send("evm_increaseTime", [DAYS_1 * 2]); // Increase time by 2 days
+        await network.provider.send("evm_mine"); // Mine a new block to apply the time increase
+
+        // Collect the order
+        await expect(sellerContract.collectOrder(orderId)).not.to.be.reverted;
+
+        // Collect the order again
+        await expect(sellerContract.collectOrder(orderId)).to.be.revertedWith("Order already completed");
+    });
+
+    it("A refund has been requested. Wait untill it will be accepted or declined", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Request a refund
+        await expect(buyerContract.requestRefund(seller.address, orderId)).not.to.be.reverted;
+
+        // Collect the order
+        await expect(sellerContract.collectOrder(orderId)).to.be.revertedWith("A refund has been requested. Wait untill it will be accepted or declined");
+    });
+
+    it("A refund has been requested and accepted. You cannot collect your order", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Request a refund
+        await expect(buyerContract.requestRefund(seller.address, orderId)).not.to.be.reverted;
+
+        // Change the refund state (accepted)
+        const ownerContract = buyerContract;
+        await expect(ownerContract.updateRefundState(seller.address, orderId, 2)).not.to.be.reverted;
+
+        // Collect the order
+        await expect(sellerContract.collectOrder(orderId)).to.be.revertedWith("A refund has been requested and accepted. You cannot collect your order");
+    });
+
+    it("You cannot collect your order yet", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Collect the order before the expiry date
+        await expect(sellerContract.collectOrder(orderId)).to.be.revertedWith("You cannot collect your order yet");
+    });
+});
+
+describe("BetaContract collect refund", function () {
+
+    it("Should collect refund", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Request a refund
+        await expect(buyerContract.requestRefund(seller.address, orderId)).not.to.be.reverted;
+
+        // Change the refund state (accepted)
+        const ownerContract = buyerContract;
+        await expect(ownerContract.updateRefundState(seller.address, orderId, 2)).not.to.be.reverted;
+
+        // Collect the refund
+        await expect(buyerContract.collectRefund(seller.address, orderId)).not.to.be.reverted;
+    });
+
+    it("You are not the buyer for this order", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Request a refund
+        await expect(buyerContract.requestRefund(seller.address, orderId)).not.to.be.reverted;
+
+        // Change the refund state (accepted)
+        const ownerContract = buyerContract;
+        await expect(ownerContract.updateRefundState(seller.address, orderId, 2)).not.to.be.reverted;
+
+        // Collect the refund from another address
+        const randomContract = contract.connect(accounts[2]);
+        await expect(randomContract.collectRefund(seller.address, orderId)).to.be.revertedWith("You are not the buyer for this order");
+    });
+
+    it("A refund has been requested and declined. You cannot collect your funds anymore", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Request a refund
+        await expect(buyerContract.requestRefund(seller.address, orderId)).not.to.be.reverted;
+
+        // Change the refund state (declined)
+        const ownerContract = buyerContract;
+        await expect(ownerContract.updateRefundState(seller.address, orderId, 3)).not.to.be.reverted;
+
+        // Go forward
+        await network.provider.send("evm_increaseTime", [DAYS_1 * 2]); // Increase time by 2 days
+        await network.provider.send("evm_mine"); // Mine a new block to apply the time increase
+
+        // Collect the order
+        await expect(sellerContract.collectOrder(orderId)).not.to.be.reverted;
+
+        // Collect the refund
+        await expect(buyerContract.collectRefund(seller.address, orderId)).to.be.revertedWith("A refund has been requested and declined. You cannot collect your funds anymore");
+    });
+
+    it("Order already completed", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Request a refund
+        await expect(buyerContract.requestRefund(seller.address, orderId)).not.to.be.reverted;
+
+        // Change the refund state (accepted)
+        const ownerContract = buyerContract;
+        await expect(ownerContract.updateRefundState(seller.address, orderId, 2)).not.to.be.reverted;
+
+        // Collect the refund
+        await expect(buyerContract.collectRefund(seller.address, orderId)).not.to.be.reverted;
+
+        // Collect the refund again
+        await expect(buyerContract.collectRefund(seller.address, orderId)).to.be.revertedWith("Order already completed");
+    });
+
+    it("A refund has been requested. Wait untill it will be accepted or declined", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Request a refund
+        await expect(buyerContract.requestRefund(seller.address, orderId)).not.to.be.reverted;
+
+        // Collect the refund
+        await expect(buyerContract.collectRefund(seller.address, orderId)).to.be.revertedWith("A refund has been requested. Wait untill it will be accepted or declined");
+    });
+
+    it("A refund has been requested and declined. You cannot collect your funds", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Request a refund
+        await expect(buyerContract.requestRefund(seller.address, orderId)).not.to.be.reverted;
+
+        // Change the refund state (declined)
+        const ownerContract = buyerContract;
+        await expect(ownerContract.updateRefundState(seller.address, orderId, 3)).not.to.be.reverted;
+
+        // Collect the refund
+        await expect(buyerContract.collectRefund(seller.address, orderId)).to.be.revertedWith("A refund has been requested and declined. You cannot collect your funds");
+    });
+
+    it("No refund has been requested for this order", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Collect the refund
+        await expect(buyerContract.collectRefund(seller.address, orderId)).to.be.revertedWith("No refund has been requested for this order");
     });
 });

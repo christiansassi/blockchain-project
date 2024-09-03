@@ -5,7 +5,7 @@
     },
 
     "scripts": {
-        "test": "npx hardhat test ./test/tests.js",
-        "test:clean": "npx hardhat clean && npx hardhat compile --force && npx hardhat test ./test/tests.js"
+        "test": "node utils/clear_screen.js && npx hardhat test ./test/tests.js",
+        "test:build": "node utils/clear_screen.js && npx hardhat clean && npx hardhat compile --force && npx hardhat test ./test/tests.js"
     }
 }

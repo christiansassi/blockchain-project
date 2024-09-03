@@ -32,7 +32,6 @@ contract BetaContract {
 
         uint price; // Product price
         uint id; // Order id
-        uint time; // Order time
         uint expiryDate; // Expiry date
 
         RefundState refundState;
@@ -42,6 +41,8 @@ contract BetaContract {
 
     event OrderIdEvent(uint orderId);
     event OrderStateEvent(bool orderState);
+    event RefundStateEvent(uint refundState);
+    event ExpiryDateEvent(uint expiryDate);
 
     // List of users
     mapping (address => User) users;
@@ -97,7 +98,6 @@ contract BetaContract {
 
         order.price = price;
         order.id = ++users[msg.sender].latestOrderId;
-        // order.time = to be filled in the buy function
         order.expiryDate = expiryDate;
 
         order.refundState = RefundState.none;
@@ -148,9 +148,6 @@ contract BetaContract {
         require(order.price == price, "Order price does not match");
         require(order.id == id, "Order ID does not match");
         require(order.expiryDate == expiryDate, "Order expiry date does not match");
-
-        // Complete the missing information inside the order
-        order.time = block.timestamp;
     }
 
     /**
@@ -162,7 +159,7 @@ contract BetaContract {
         
         Order memory order = users[msg.sender].orders[id];
 
-        require(order.time != 0, "Order does not exist");
+        require(order.buyer != address(0), "Order does not exist");
 
         emit OrderStateEvent(order.completed);
         return order.completed;
@@ -219,7 +216,7 @@ contract BetaContract {
 
         Order storage order = users[seller].orders[id];
 
-        require(order.time != 0, "Order does not exist");
+        require(order.buyer != address(0), "Order does not exist");
         require(!order.completed, "Order already completed");
         
         require(order.refundState != RefundState.none, "No refund has been requested for this order");
@@ -235,12 +232,13 @@ contract BetaContract {
     * @param id The ID of the order.
     * @return The state of the refund request.
     */
-    function getRefundState(uint id) public view returns(uint) {
+    function getRefundState(uint id) public returns(uint) {
 
         Order memory order = users[msg.sender].orders[id];
 
-        require(order.time != 0, "Order does not exist");
+        require(order.buyer != address(0), "Order does not exist");
 
+        emit RefundStateEvent(uint(order.refundState));
         return uint(order.refundState);
     }
 
@@ -250,12 +248,13 @@ contract BetaContract {
     * @param id The ID of the order.
     * @return The state of the refund request.
     */
-    function getRefundState(address seller, uint id) public view returns(uint) {
+    function getRefundState(address seller, uint id) public returns(uint) {
 
         Order memory order = users[seller].orders[id];
 
         require(order.buyer == msg.sender, "You are not the buyer for this order"); 
 
+        emit RefundStateEvent(uint(order.refundState));
         return uint(order.refundState);
     }
 
@@ -264,12 +263,13 @@ contract BetaContract {
      * @param id Order's ID.
      * @return Time left.
      */
-    function getExpiryDate(uint id) public view returns(uint){
+    function getExpiryDate(uint id) public returns(uint){
 
         Order memory order = users[msg.sender].orders[id];
 
-        require(order.time != 0, "Order does not exist");
+        require(order.buyer != address(0), "Order does not exist");
 
+        emit ExpiryDateEvent(order.expiryDate);
         return order.expiryDate;
     }
 
@@ -279,13 +279,13 @@ contract BetaContract {
      * @param id Order's ID.
      * @return Time left.
      */
-    function getExpiryDate(address seller, uint id) public view returns(uint){
+    function getExpiryDate(address seller, uint id) public returns(uint){
 
         Order memory order = users[seller].orders[id];
 
-        require(order.time != 0, "Order does not exist");
         require(order.buyer == msg.sender, "You are not the buyer for this order");
 
+        emit ExpiryDateEvent(order.expiryDate);
         return order.expiryDate;
     }
     
@@ -297,12 +297,12 @@ contract BetaContract {
 
         Order storage order = users[msg.sender].orders[id];
 
-        require(order.time != 0, "Order does not exist");
+        require(order.buyer != address(0), "Order does not exist");
         
         if(order.completed)
         {
             // Order is completed, meaning that funds have been transfer to the buyer
-            require(order.refundState != RefundState.accepted, "Order completed: a refund has been requested and accepted. You cannot collect your order");
+            require(order.refundState != RefundState.accepted, "A refund has been requested and accepted. You cannot collect your order anymore");
 
             // Order is completed
             require(!order.completed, "Order already completed");
@@ -335,13 +335,12 @@ contract BetaContract {
 
         Order storage order = users[seller].orders[id];
 
-        require(order.time != 0, "Order does not exist");
         require(order.buyer == msg.sender, "You are not the buyer for this order");
         
         if(order.completed)
         {
             // Order is completed, meaning that funds have already been transfer to the seller
-            require(order.refundState != RefundState.declined, "Order completed: a refund has been requested and declined. You cannot collect your funds");
+            require(order.refundState != RefundState.declined, "A refund has been requested and declined. You cannot collect your funds anymore");
 
             // Order is completed
             require(!order.completed, "Order already completed");
@@ -352,7 +351,10 @@ contract BetaContract {
             require(order.refundState != RefundState.pending, "A refund has been requested. Wait untill it will be accepted or declined");
 
             // If a refund has been requested and declined, it means that funds are destinated to the seller and only him can set the order as completed
-            require(order.refundState != RefundState.declined, "A refund has been requested and accepted. You cannot collect your funds");
+            require(order.refundState != RefundState.declined, "A refund has been requested and declined. You cannot collect your funds");
+
+            // If there is no refund request, buyer cannot collect funds
+            require(order.refundState != RefundState.none, "No refund has been requested for this order");
         }
 
         // Set order as completed
