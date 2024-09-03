@@ -48,7 +48,7 @@ describe("BetaContract deployment", function () {
 
         // Get accounts, the first one is the owner of the contract
         const accounts = await ethers.getSigners();
-
+        
         // Verify if the owner has been set successfully
         expect(await contract.getOwner()).to.equal(accounts[0].address, "Owner address doesn't match");
 
