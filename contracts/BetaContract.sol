@@ -39,6 +39,7 @@ contract BetaContract {
         bool completed;
     }
 
+    event OwnerEvent(address owner);
     event OrderIdEvent(uint orderId);
     event OrderStateEvent(bool orderState);
     event RefundStateEvent(uint refundState);
@@ -59,7 +60,8 @@ contract BetaContract {
     * @dev Gets current owner.
     * @return Owner's address.
     */
-    function getOwner() public view returns(address) {
+    function getOwner() public returns(address) {
+        emit OwnerEvent(owner);
         return owner;
     }
 
