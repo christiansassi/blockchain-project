@@ -65,3 +65,16 @@ You can now test the contract's functions by expanding the contract window withi
 
 > [!WARNING]
 > The first two addresses, `0x40271F69d03387d2C4868B01F8b003D91c247358` and `0xB4627216F33ADfe1d521243f73a884E40368F8A0`, are reserved. The first address is used to deploy the contract and is then discarded to avoid affecting the balance of the other addresses. The second address represents the (new) owner.
+
+# Contacts
+
+Matteo Beltrami - [matteo.beltrami-1@studenti.unitn.it](mailto:pietro.bologna@studenti.unitn.it)
+
+Luca Pedercini - [luca.pedercini@studenti.unitn.it](mailto:luca.pedercini@studenti.unitn.it)
+
+Christian Sassi - [christian.sassi@studenti.unitn.it](mailto:christian.sassi@studenti.unitn.it)
+
+<picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/extras/dark.png">
+    <img alt="https://www.unitn.it/" src="assets/extras/light.png" width="300px">
+</picture>
