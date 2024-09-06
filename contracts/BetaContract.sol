@@ -51,6 +51,9 @@ contract BetaContract {
     // Owner's address
     address private owner;
 
+    // Fee
+    uint constant FEE = 1; // 1%
+
     // Set contract creator as the initial owner
     constructor() {
         owner = msg.sender;
@@ -324,8 +327,11 @@ contract BetaContract {
         // Set order as completed
         order.completed = true;
 
-        // Transfer funds to the seller
-        payable(msg.sender).transfer(order.price);
+        // Transfer funds to the seller and keep the 1%
+        uint amount = order.price;
+        amount = amount * (100 - FEE) / 100;
+    
+        payable(msg.sender).transfer(amount);
     }
 
     /**
