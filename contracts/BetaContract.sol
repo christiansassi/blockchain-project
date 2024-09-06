@@ -219,6 +219,8 @@ contract BetaContract {
 
         require(msg.sender == owner, "Only the owner can update the state of a refund request");
 
+        require(newRefundState == RefundState.accepted || newRefundState == RefundState.declined, "Invalid refund state. Available refund states: accepted (2) and declined (3)");
+
         Order storage order = users[seller].orders[id];
 
         require(order.buyer != address(0), "Order does not exist");

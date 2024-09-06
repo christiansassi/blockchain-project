@@ -6,6 +6,7 @@ const { BigNumber } = import("ethers");
 const ETH = ethers.parseEther("1.0"); // 1 ETH in wei
 
 const CONTRACT_NAME = "BetaContract";
+const OWNER_EVENT = "OwnerEvent";
 const ORDER_ID_EVENT = "OrderIdEvent";
 const ORDER_STATE_EVENT = "OrderStateEvent";
 const REFUND_STATE_EVENT = "RefundStateEvent";
@@ -49,9 +50,7 @@ describe("BetaContract deployment", function () {
         // Get accounts, the first one is the owner of the contract
         const accounts = await ethers.getSigners();
         
-        // Verify if the owner has been set successfully
-        expect(await contract.getOwner()).to.equal(accounts[0].address, "Owner address doesn't match");
-
+        await expect(contract.getOwner()).to.emit(contract, OWNER_EVENT).withArgs(accounts[0].address);
     });
 
     it("Should set a new owner", async function () {
@@ -66,8 +65,7 @@ describe("BetaContract deployment", function () {
         await contract.setOwner(accounts[1].address);
 
         // Verify if the owner has been changed successfully
-        expect(await contract.getOwner()).to.equal(accounts[1].address, "Unable to set new owner via setOwner()");
-
+        await expect(contract.getOwner()).to.emit(contract, OWNER_EVENT).withArgs(accounts[1].address);
     });
 
     it("Only the owner can set a new owner", async function () {
@@ -968,6 +966,21 @@ describe("BetaContract update refund state", function () {
         // Try to change a refund state with a random account
         const randomContract = contract.connect(accounts[2]);
         await expect(randomContract.updateRefundState(accounts[1].address, 1, 2)).to.be.revertedWith("Only the owner can update the state of a refund request");
+    });
+
+    it("Invalid refund state. Available refund states: accepted (2) and declined (3)", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Try to change a refund state with an invalid state
+        const ownerContract = contract.connect(accounts[0]);
+
+        await expect(ownerContract.updateRefundState(accounts[1].address, 1, 0)).to.be.revertedWith("Invalid refund state. Available refund states: accepted (2) and declined (3)");
+        await expect(ownerContract.updateRefundState(accounts[1].address, 1, 1)).to.be.revertedWith("Invalid refund state. Available refund states: accepted (2) and declined (3)");
     });
 
     it("Order does not exist", async function () {
