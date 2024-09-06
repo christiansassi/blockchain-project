@@ -11,6 +11,7 @@ const ORDER_ID_EVENT = "OrderIdEvent";
 const ORDER_STATE_EVENT = "OrderStateEvent";
 const REFUND_STATE_EVENT = "RefundStateEvent";
 const EXPIRY_DATE_EVENT = "ExpiryDateEvent";
+const FEES_EVENT = "FeesEvent";
 
 const DAYS_1 = 24 * 60 * 60;
 const MINUTES_1 = 60;
@@ -1980,5 +1981,139 @@ describe("BetaContract collect refund", function () {
 
         // Collect the refund
         await expect(buyerContract.collectRefund(seller.address, orderId)).to.be.revertedWith("No refund has been requested for this order");
+    });
+});
+
+describe("BetaContract collect fees", function () {
+
+    it("Should collect fees", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Go forward
+        await network.provider.send("evm_increaseTime", [DAYS_1 * 2]); // Increase time by 2 days
+        await network.provider.send("evm_mine"); // Mine a new block to apply the time increase
+
+        // Collect the order
+        await expect(sellerContract.collectOrder(orderId)).not.to.be.reverted;
+
+        // Collect the fees
+        const ownerContract = buyerContract;
+        await expect(ownerContract.collectFees()).not.to.be.reverted;
+    });
+
+    it("Only the owner can collect the fees", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Collect the fees
+        const randomContract = contract.connect(accounts[2]);
+        await expect(randomContract.collectFees()).to.be.revertedWith("Only the owner can collect the fees");
+    });
+
+    it("No fees available to collected", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Collect the fees
+        const ownerContract = contract.connect(accounts[0]);
+        await expect(ownerContract.collectFees()).to.be.revertedWith("No fees available to collected");
+    });
+
+    it("Only the owner can retrieve the collected fees", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Collect the fees
+        const randomContract = contract.connect(accounts[2]);
+        await expect(randomContract.getFees()).to.be.revertedWith("Only the owner can retrieve the collected fees");
+    });
+
+    it("Should collect fees", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+    
+        // Set buyer and seller
+        const buyer = accounts[0];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[1];
+        const sellerContract = contract.connect(seller);
+        
+        // Create the order
+        const price = ETH;
+        const expiryDate = getCurrentTimestamp() + DAYS_1;
+
+        // Create listener for ORDER_ID_EVENT
+        let orderIdPromise = new Promise((resolve) => {
+            sellerContract.once(ORDER_ID_EVENT, (orderId) => {
+                resolve(Number(orderId.toString()));
+            });
+        });
+
+        // Create the order
+        await expect(sellerContract.sell(buyer.address, price, expiryDate)).to.emit(contract, ORDER_ID_EVENT).withArgs(1);
+
+        const orderId = await orderIdPromise;
+
+        await expect(buyerContract.buy(seller.address, price, orderId, expiryDate, { value: price })).not.to.be.reverted;
+
+        // Go forward
+        await network.provider.send("evm_increaseTime", [DAYS_1 * 2]); // Increase time by 2 days
+        await network.provider.send("evm_mine"); // Mine a new block to apply the time increase
+
+        // Collect the order
+        await expect(sellerContract.collectOrder(orderId)).not.to.be.reverted;
+        
+        const fees = (Number(price) - (Number(price) * (100 - 1) / 100));
+
+        // Get the fees
+        const ownerContract = buyerContract;
+        await expect(ownerContract.getFees()).to.emit(contract, FEES_EVENT).withArgs(BigInt(fees));
     });
 });

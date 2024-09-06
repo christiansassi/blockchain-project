@@ -44,6 +44,7 @@ contract BetaContract {
     event OrderStateEvent(bool orderState);
     event RefundStateEvent(uint refundState);
     event ExpiryDateEvent(uint expiryDate);
+    event FeesEvent(uint fees);
 
     // List of users
     mapping (address => User) users;
@@ -53,6 +54,7 @@ contract BetaContract {
 
     // Fee
     uint constant FEE = 1; // 1%
+    uint fees;
 
     // Set contract creator as the initial owner
     constructor() {
@@ -330,9 +332,11 @@ contract BetaContract {
         order.completed = true;
 
         // Transfer funds to the seller and keep the 1%
-        uint amount = order.price;
-        amount = amount * (100 - FEE) / 100;
-    
+        uint amount = order.price * (100 - FEE) / 100;
+
+        // Keep track of fees
+        fees = fees + (order.price - amount);
+
         payable(msg.sender).transfer(amount);
     }
 
@@ -372,5 +376,29 @@ contract BetaContract {
 
         // Transfer funds to the seller
         payable(msg.sender).transfer(order.price);
+    }
+
+    /**
+    * @dev Transfers the accumulated fees to the owner.
+    */
+    function collectFees() public payable {
+        require(msg.sender == owner, "Only the owner can collect the fees");
+        require(fees != 0, "No fees available to collected");
+
+        uint amount = fees;
+        fees = 0;
+
+        payable(msg.sender).transfer(amount);
+    }
+
+    /**
+    * @dev Retrieves the total fees accumulated by the contract.
+    * @return The total fees (earnings) of the contract.
+    */
+    function getFees() public returns(uint){
+        require(msg.sender == owner, "Only the owner can retrieve the collected fees");
+
+        emit FeesEvent(fees);
+        return fees;
     }
 }
