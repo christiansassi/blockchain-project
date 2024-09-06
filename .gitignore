@@ -3,6 +3,8 @@
 contracts/artifacts
 contracts/cache
 
+hardhat
+
 node_modules
 
 package-lock.json
