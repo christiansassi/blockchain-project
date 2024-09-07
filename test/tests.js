@@ -12,6 +12,7 @@ const ORDER_STATE_EVENT = "OrderStateEvent";
 const REFUND_STATE_EVENT = "RefundStateEvent";
 const EXPIRY_DATE_EVENT = "ExpiryDateEvent";
 const FEES_EVENT = "FeesEvent";
+const MESSAGE_EVENT = "MessageEvent";
 
 const DAYS_1 = 24 * 60 * 60;
 const MINUTES_1 = 60;
@@ -2115,5 +2116,52 @@ describe("BetaContract collect fees", function () {
         // Get the fees
         const ownerContract = buyerContract;
         await expect(ownerContract.getFees()).to.emit(contract, FEES_EVENT).withArgs(BigInt(fees));
+    });
+});
+
+describe("BetaContract messages system", function () {
+
+    it("Should send a message", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+        
+        // Set sender and receiver
+        const sender = accounts[0];
+        const senderContract = contract.connect(sender);
+
+        const receiver = accounts[1];
+
+        const message = "Hello World!";
+
+        // Send message
+        await expect(senderContract.sendMessage(receiver.address, message)).not.to.be.reverted;
+    });
+
+    it("Should get the message", async function () {
+
+        // Using the fixture to get a clean deployment
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get accounts, the first one is the owner of the contract
+        const accounts = await ethers.getSigners();
+        
+        // Set sender and receiver
+        const sender = accounts[0];
+        const senderContract = contract.connect(sender);
+
+        const receiver = accounts[1];
+        const receiverContract = contract.connect(receiver);
+
+        const message = "Hello World!";
+
+        // Send message
+        await expect(senderContract.sendMessage(receiver.address, message)).not.to.be.reverted;
+
+        // Receive message
+        await expect(receiverContract.getMessage(sender.address)).to.emit(contract, MESSAGE_EVENT).withArgs(message);
     });
 });
