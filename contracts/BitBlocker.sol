@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-contract BetaContract {
+contract BitBlocker {
 
     // Struct to manage users
     struct User {
@@ -45,6 +45,7 @@ contract BetaContract {
     event RefundStateEvent(uint refundState);
     event ExpiryDateEvent(uint expiryDate);
     event FeesEvent(uint fees);
+    event MessageEvent(string message);
 
     // List of users
     mapping (address => User) users;
@@ -55,6 +56,9 @@ contract BetaContract {
     // Fee
     uint constant FEE = 1; // 1%
     uint fees;
+
+    // Messages: from -> to -> message
+    mapping (address => mapping(address => string)) messages;
 
     // Set contract creator as the initial owner
     constructor() {
@@ -400,5 +404,27 @@ contract BetaContract {
 
         emit FeesEvent(fees);
         return fees;
+    }
+
+    /**
+    * @dev Saves a message for the destination address from the sender. The message queue has a size of 1, meaning that
+    * if multiple messages are sent to the same destination, only the most recent message will be saved (until the destination reads it).
+    * @param to Destination address.
+    * @param message Message.
+    */
+    function sendMessage(address to, string memory message) public {
+        messages[msg.sender][to] = message;
+    }
+
+    /**
+    * @dev Retrieves the last message sent by the source address
+    * @param from source address
+    * @return message
+    */
+    function getMessage(address from) public returns(string memory){
+        string memory message = messages[from][msg.sender];
+
+        emit MessageEvent(message);
+        return message;
     }
 }

@@ -3,10 +3,12 @@
         "@nomicfoundation/hardhat-toolbox": "^5.0.0",
         "hardhat": "^2.22.9"
     },
-
     "scripts": {
         "compile": "npx hardhat clean && npx hardhat compile --force",
-        "test": "node utils/clear_screen.js && npx hardhat test ./test/tests.js",
-        "test:build": "node utils/clear_screen.js && npx hardhat clean && npx hardhat compile --force && npx hardhat test ./test/tests.js"
+        "tests": "node utils/clear_screen.js && npx hardhat test ./test/tests.js",
+        "tests:compile": "node utils/clear_screen.js && npx hardhat clean && npx hardhat compile --force && npx hardhat test ./test/tests.js"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": "^5.0.2"
     }
 }

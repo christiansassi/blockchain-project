@@ -1,0 +1,155 @@
+body {
+    font-family: "Satoshi-Medium", sans-serif;
+    font-size: 16px;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+/* TOP BAR */
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background: rgba(255, 255, 255, 1);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(225, 225, 225, 1);
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+.logo img {
+    height: 48px;
+    width: auto;
+    white-space: nowrap;
+}
+
+.text {
+    display: inline-block;
+    height: 48px;
+    width: 120px;
+    line-height: 48px;
+    background-color: black;
+    color: white;
+    text-align: center;
+    font-size: 18px;
+    white-space: nowrap;
+    padding: 0 20px;
+    text-decoration: none;
+    border-radius: 100vw;
+    transition: font-weight 0.3s, color 0.3s, background-color 0.3s;
+}
+
+.text:hover {
+    font-weight: 900;
+    cursor: pointer;
+}
+
+/* BODY */
+.container {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#text-svg {
+    position: absolute;
+    will-change: transform;
+}
+
+.section {
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    position: relative;
+    text-align: center;
+    z-index: 10;
+}
+
+.content {
+    max-width: 1200px;
+    padding: 20px;
+    margin: 0 auto;
+}
+
+h1, h2, p {
+    margin: 0; 
+}
+
+h1 {
+    font-size: 96px;
+    font-weight: 900;
+    margin-bottom: 48px;
+    line-height: 1.25;
+}
+
+h2 {
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+p {
+    font-size: 24px;
+    line-height: 1.5;
+}
+
+/* FLEXIBLE ROWS */
+.row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.column {
+    text-align: center;
+}
+
+/* BOX LAYOUT */
+.cards {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 20px;
+}
+
+.card {
+    background-color: rgb(13, 13, 13);
+    border-radius: 33px;
+    padding: 40px;
+    height: 230px;
+    width: 400px;
+    text-align: left;
+    margin: 50px auto;
+}
+
+.card h1 {
+    font-size: 34px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.card p {
+    font-size: 24px;
+    line-height: 1.25;
+}
+
+/* PRIMARY COLOR */
+.primary {
+    color: #22fe1a;
+}

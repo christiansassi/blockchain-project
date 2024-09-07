@@ -5,7 +5,7 @@ const { BigNumber } = import("ethers");
 
 const ETH = ethers.parseEther("1.0"); // 1 ETH in wei
 
-const CONTRACT_NAME = "BetaContract";
+const CONTRACT_NAME = "BitBlocker";
 const OWNER_EVENT = "OwnerEvent";
 const ORDER_ID_EVENT = "OrderIdEvent";
 const ORDER_STATE_EVENT = "OrderStateEvent";
@@ -31,7 +31,7 @@ async function deployContractFixture() {
     return { contract };
 }
 
-describe("BetaContract deployment", function () {
+describe("BitBlocker deployment", function () {
 
     it("Should return a valid contract address", async function () {
 
@@ -86,7 +86,7 @@ describe("BetaContract deployment", function () {
 
 });
 
-describe("BetaContract sell", function () {
+describe("BitBlocker sell", function () {
 
     it("Should sell a valid product", async function () {
 
@@ -173,7 +173,7 @@ describe("BetaContract sell", function () {
 
 });
 
-describe("BetaContract buy", function () {
+describe("BitBlocker buy", function () {
 
     it("Should buy a valid product", async function () {
 
@@ -434,7 +434,7 @@ describe("BetaContract buy", function () {
 
 });
 
-describe("BetaContract get order state", function () {
+describe("BitBlocker get order state", function () {
 
     it("Order not completed", async function () {
 
@@ -600,7 +600,7 @@ describe("BetaContract get order state", function () {
 
 });
 
-describe("BetaContract request refund", function () {
+describe("BitBlocker request refund", function () {
 
     it("Should request a refund", async function () {
 
@@ -893,7 +893,7 @@ describe("BetaContract request refund", function () {
 
 });
 
-describe("BetaContract update refund state", function () {
+describe("BitBlocker update refund state", function () {
 
     it("Should update a refund state", async function () {
 
@@ -1205,7 +1205,7 @@ describe("BetaContract update refund state", function () {
     });
 });
 
-describe("BetaContract get refund state", function () {
+describe("BitBlocker get refund state", function () {
 
     it("Should get refund state", async function () {
 
@@ -1306,7 +1306,7 @@ describe("BetaContract get refund state", function () {
     });
 });
 
-describe("BetaContract get expiry date", function () {
+describe("BitBlocker get expiry date", function () {
 
     it("Should get expiry date", async function () {
 
@@ -1401,7 +1401,7 @@ describe("BetaContract get expiry date", function () {
     });
 });
 
-describe("BetaContract collect order", function () {
+describe("BitBlocker collect order", function () {
 
     it("Should collect order", async function () {
 
@@ -1673,7 +1673,7 @@ describe("BetaContract collect order", function () {
     });
 });
 
-describe("BetaContract collect refund", function () {
+describe("BitBlocker collect refund", function () {
 
     it("Should collect refund", async function () {
 
@@ -1984,7 +1984,7 @@ describe("BetaContract collect refund", function () {
     });
 });
 
-describe("BetaContract collect fees", function () {
+describe("BitBlocker collect fees", function () {
 
     it("Should collect fees", async function () {
 
