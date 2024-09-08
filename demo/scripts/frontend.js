@@ -55,6 +55,26 @@ function observeAnimatedValues() {
     }
 }
 
+// Animated elements logic
+function observeAnimatedElements() {
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animated-element');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.1
+    });
+
+    document.querySelectorAll('.content').forEach(element => {
+        observer.observe(element);
+    });
+
+}
+
 // Theme switching logic
 function switchToLight() {
 
@@ -117,6 +137,8 @@ function init() {
 
     window.addEventListener("scroll", switchTheme);
     switchTheme();
+
+    observeAnimatedElements()
 }
 
 // Start when document is loaded

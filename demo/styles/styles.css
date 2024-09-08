@@ -158,3 +158,21 @@ p {
 .primary {
     color: #22fe1a;
 }
+
+/* Keyframes for the animation */
+@keyframes fadeInMoveUp {
+0% {
+    opacity: 0;
+    transform: translateY(60px);
+}
+
+100% {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+}
+.animated-element {
+    opacity: 0;
+    animation: fadeInMoveUp 0.8s ease-in forwards;
+}
