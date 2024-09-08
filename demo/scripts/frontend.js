@@ -1,3 +1,28 @@
+// Light theme
+var hasSwitchedToLight = false;
+
+const topBar_backgroundColor_light = "white";
+const topBar_border_light = "1px solid rgba(225, 225, 225)";
+
+const launchAppButton_backgroundColor_light = "black";
+const launchAppButton_color_light = "white";
+
+const logoImg_light = "assets/logo-extended-light-mode.png";
+const pageIcon_light = "assets/logo-light-mode.png";
+
+// Dark theme
+var hasSwitchedToDark = false;
+
+const topBar_backgroundColor_dark = "black";
+const topBar_border_dark = "1px solid rgba(30, 30, 30)";
+
+const launchAppButton_backgroundColor_dark = "white";
+const launchAppButton_color_dark = "black";
+
+const logoImg_dark = "assets/logo-dark-mode.png";
+const pageIcon_dark = "assets/logo-dark-mode.png";
+
+// Animated values logic
 function animateValue(obj, start, end, duration) {
     let startTimestamp = null;
     const step = (timestamp) => {
@@ -12,8 +37,11 @@ function animateValue(obj, start, end, duration) {
 }
 
 function observeAnimatedValues() {
+
     const objects = document.getElementsByClassName("animated-value");
-    for (let object of objects) {
+
+    for (let object of objects) 
+    {
         const observer = new IntersectionObserver(entries => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -22,42 +50,57 @@ function observeAnimatedValues() {
                 }
             });
         });
+
         observer.observe(object);
     }
 }
 
-function switchToDark() {
-    const topBar = document.getElementsByClassName("top-bar")[0];
-    topBar.style.backgroundColor = "black";
-    topBar.style.border = "1px solid rgba(30, 30, 30)";
-
-    const textButton = document.getElementsByClassName("text")[0];
-    textButton.style.backgroundColor = "white";
-    textButton.style.color = "black";
-
-    const logoImg = document.getElementsByClassName("logo")[0].getElementsByTagName("img")[0];
-    logoImg.src = "assets/logo-dark-mode.png";
-
-    document.getElementById("page-icon").href = "assets/logo-dark-mode.png";
-}
-
+// Theme switching logic
 function switchToLight() {
 
-    const topBar = document.getElementsByClassName("top-bar")[0];
-    topBar.style.backgroundColor = "white";
-    topBar.style.border = "1px solid rgb(225, 225, 225)";
+    if(hasSwitchedToLight)
+        return
 
-    const textButton = document.getElementsByClassName("text")[0];
-    textButton.style.backgroundColor = "black";
-    textButton.style.color = "white";
+    hasSwitchedToLight = true;
+    hasSwitchedToDark = false;
+
+    const topBar = document.getElementsByClassName("top-bar")[0];
+    topBar.style.backgroundColor = topBar_backgroundColor_light;
+    topBar.style.border = topBar_border_light;
+
+    const launchAppButton = document.getElementsByClassName("launch-app")[0];
+    launchAppButton.style.backgroundColor = launchAppButton_backgroundColor_light;
+    launchAppButton.style.color = launchAppButton_color_light;
 
     const logoImg = document.getElementsByClassName("logo")[0].getElementsByTagName("img")[0];
-    logoImg.src = "assets/logo-extended-light-mode.png";
+    logoImg.src = logoImg_light;
 
-    document.getElementById("page-icon").href = "assets/logo-light-mode.png";
+    document.getElementById("page-icon").href = pageIcon_light;
 }
 
-function handleScroll() {
+function switchToDark() {
+
+    if(hasSwitchedToDark)
+        return
+
+    hasSwitchedToDark = true;
+    hasSwitchedToLight = false;
+
+    const topBar = document.getElementsByClassName("top-bar")[0];
+    topBar.style.backgroundColor = topBar_backgroundColor_dark;
+    topBar.style.border = topBar_border_dark;
+
+    const launchAppButton = document.getElementsByClassName("launch-app")[0];
+    launchAppButton.style.backgroundColor = launchAppButton_backgroundColor_dark;
+    launchAppButton.style.color = launchAppButton_color_dark;
+
+    const logoImg = document.getElementsByClassName("logo")[0].getElementsByTagName("img")[0];
+    logoImg.src = logoImg_dark;
+
+    document.getElementById("page-icon").href = pageIcon_dark;
+}
+
+function switchTheme() {
 
     const scrollY = window.scrollY || window.pageYOffset;
     const scrollThreshold = 2260;
@@ -68,10 +111,13 @@ function handleScroll() {
         switchToLight();
 }
 
+// Init
 function init() {
     observeAnimatedValues();
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
+
+    window.addEventListener("scroll", switchTheme);
+    switchTheme();
 }
 
+// Start when document is loaded
 document.addEventListener("DOMContentLoaded", init);

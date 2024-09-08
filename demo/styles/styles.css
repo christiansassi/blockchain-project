@@ -34,7 +34,7 @@ body {
     white-space: nowrap;
 }
 
-.text {
+.launch-app {
     display: inline-block;
     height: 48px;
     width: 120px;
@@ -50,7 +50,7 @@ body {
     transition: font-weight 0.3s, color 0.3s, background-color 0.3s;
 }
 
-.text:hover {
+.launch-app:hover {
     font-weight: 900;
     cursor: pointer;
 }
@@ -140,6 +140,7 @@ p {
     width: 400px;
     text-align: left;
     margin: 50px auto;
+    animation: fadeInMoveUp 0.8s ease-in forwards;
 }
 
 .card h1 {
