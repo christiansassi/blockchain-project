@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: "Satoshi-Medium", sans-serif;
     font-size: 16px;
@@ -132,7 +136,7 @@ p {
     background-color: rgb(13, 13, 13);
     border-radius: 33px;
     padding: 40px;
-    height: 230px;
+    height: 270px;
     width: 400px;
     text-align: left;
     margin: 50px auto;
