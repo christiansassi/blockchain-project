@@ -1,3 +1,6 @@
+// Theme
+var isHovering = false;
+
 // Light theme
 var hasSwitchedToLight = false;
 
@@ -76,9 +79,9 @@ function observeAnimatedElements() {
 }
 
 // Theme switching logic
-function switchToLight() {
+function switchToLight(force) {
 
-    if(hasSwitchedToLight)
+    if(hasSwitchedToLight && !force)
         return
 
     hasSwitchedToLight = true;
@@ -88,9 +91,12 @@ function switchToLight() {
     topBar.style.backgroundColor = topBar_backgroundColor_light;
     topBar.style.border = topBar_border_light;
 
-    const launchAppButton = document.getElementsByClassName("launch-app")[0];
-    launchAppButton.style.backgroundColor = launchAppButton_backgroundColor_light;
-    launchAppButton.style.color = launchAppButton_color_light;
+    if(!isHovering)
+    {
+        const launchAppButton = document.getElementsByClassName("launch-app")[0];
+        launchAppButton.style.backgroundColor = launchAppButton_backgroundColor_light;
+        launchAppButton.style.color = launchAppButton_color_light;
+    }
 
     const logoImg = document.getElementsByClassName("logo")[0].getElementsByTagName("img")[0];
     logoImg.src = logoImg_light;
@@ -98,9 +104,9 @@ function switchToLight() {
     document.getElementById("page-icon").href = pageIcon_light;
 }
 
-function switchToDark() {
+function switchToDark(force) {
 
-    if(hasSwitchedToDark)
+    if(hasSwitchedToDark && !force)
         return
 
     hasSwitchedToDark = true;
@@ -110,9 +116,12 @@ function switchToDark() {
     topBar.style.backgroundColor = topBar_backgroundColor_dark;
     topBar.style.border = topBar_border_dark;
 
-    const launchAppButton = document.getElementsByClassName("launch-app")[0];
-    launchAppButton.style.backgroundColor = launchAppButton_backgroundColor_dark;
-    launchAppButton.style.color = launchAppButton_color_dark;
+    if(!isHovering)
+    {
+        const launchAppButton = document.getElementsByClassName("launch-app")[0];
+        launchAppButton.style.backgroundColor = launchAppButton_backgroundColor_dark;
+        launchAppButton.style.color = launchAppButton_color_dark;
+    }
 
     const logoImg = document.getElementsByClassName("logo")[0].getElementsByTagName("img")[0];
     logoImg.src = logoImg_dark;
@@ -120,15 +129,18 @@ function switchToDark() {
     document.getElementById("page-icon").href = pageIcon_dark;
 }
 
-function switchTheme() {
+function switchTheme(force) {
+
+    if (typeof force !== 'boolean')
+        force = false;
 
     const scrollY = window.scrollY || window.pageYOffset;
     const scrollThreshold = 2260;
 
     if (scrollY > scrollThreshold)
-        switchToDark();
+        switchToDark(force);
     else
-        switchToLight();
+        switchToLight(force);
 }
 
 // Init
@@ -137,6 +149,20 @@ function init() {
 
     window.addEventListener("scroll", switchTheme);
     switchTheme();
+
+    // Fix hover problem
+    const element = document.getElementsByClassName("launch-app")[0];
+
+    element.addEventListener('mouseover', () => {
+        isHovering = true;
+        element.style.backgroundColor = '#22fe1a';
+        element.style.color = 'black';
+    });
+
+    element.addEventListener('mouseout', () => {
+        isHovering = false;
+        switchTheme(true);
+    });
 
     observeAnimatedElements()
 }

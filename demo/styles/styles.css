@@ -26,6 +26,7 @@ body {
     border-bottom: 1px solid rgba(225, 225, 225, 1);
     z-index: 1000;
     box-sizing: border-box;
+    user-select: none;
 }
 
 .logo img {
@@ -47,12 +48,20 @@ body {
     padding: 0 20px;
     text-decoration: none;
     border-radius: 100vw;
-    transition: font-weight 0.3s, color 0.3s, background-color 0.3s;
+    transition: transform 0.2s;
+}
+
+.launch-app:active {
+    transform: scale(0.95);
+    font-size: 17px;
 }
 
 .launch-app:hover {
     font-weight: 900;
     cursor: pointer;
+    
+    color: black;
+    background-color: #22fe1a;
 }
 
 /* BODY */
@@ -63,6 +72,7 @@ body {
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    user-select: none;
 }
 
 #text-svg {
@@ -87,6 +97,7 @@ body {
     max-width: 1200px;
     padding: 20px;
     margin: 0 auto;
+    opacity: 0;
 }
 
 h1, h2, p {
