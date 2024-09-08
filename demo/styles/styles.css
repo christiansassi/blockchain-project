@@ -174,5 +174,5 @@ p {
 }
 .animated-element {
     opacity: 0;
-    animation: fadeInMoveUp 0.8s ease-in forwards;
+    animation: fadeInMoveUp 1.45s ease-in forwards;
 }
