@@ -7,6 +7,11 @@ First, clone this repository by running `git clone https://github.com/christians
 1. Download and install Node.js from [here](https://nodejs.org/en/download/package-manager).
 2. Install the required packages by running `npm install`
 
+## <img src="https://www.python.org/static/favicon.ico" width="20" style="position: relative; top: 2px; margin-right: 8px;" /> Python
+
+1. Download and install Python from [here](https://www.python.org/downloads/).
+2. Install the required packages by running `pip install -r requirements.txt`
+
 ## <img src="https://archive.trufflesuite.com/img/ganache-logomark.svg" width="20" style="position: relative; top: 2px; margin-right: 8px;" /> Ganache
 
 1. Install Ganache CLI by running `npm install ganache --global`
@@ -23,6 +28,19 @@ First, clone this repository by running `git clone https://github.com/christians
 1. Install the npm package by running `npm install @remix-project/remixd --global`
 2. Start the Remix daemon inside your project directory. Navigate to your project folder and run `remixd -s .`
 3. Open the Remix Online IDE [here](https://remix.ethereum.org/), and in the top-left corner, under the workspace section, select `connect to localhost`.
+
+## <img src="https://github.com/MetaMask/brand-resources/raw/master/SVG/SVG_MetaMask_Icon_Color.svg" width="30" style="position: relative; top: 6px; margin-right: 8px;" /> MetaMask
+
+1. Download and intsall MetaMask from [here](https://metamask.io/download/).
+2. Click on `Import an existing wallet` and enter the following mnemonic phrase: `museum coin tiger catalog dutch doll daring toddler festival cushion fuel nest`. This mnemonic will be used by Ganache when you run the demo.
+3. Click on `+ Add Network > Add a network manually` and set the following:
+   - **Network Name**: `Ganache`
+   - **RPC URL**: `http://127.0.0.1:8545`
+   - **Chain ID**: `1337`
+   - **Currency Symbol**: `ETH`
+
+By default, MetaMask will add the address at index 0, which is `0x40271F69d03387d2C4868B01F8b003D91c247358`. To use other addresses, go to MetaMask and click `+ Add account or hardware wallet > Import account`. Copy and paste the private key for the chosen account. For example, to import the second account (index 1), use the private key `0x8e2b0a8ad2a6c502ea7b37273f2070e7e01ab6d08059c94076d6c5f58e3000c3`, as shown in the Ganache console when you run the local Ethereum blockchain.
+
 
 # Getting Started
 
@@ -54,17 +72,6 @@ You can now test the contract's functions by expanding the contract window withi
 
 > [!TIP]
 > If you would like to reset the wallets (e.g., restore the balances), simply select and reselect the same environment (e.g., `Remix VM (Shanghai)`).
-
-## Running Demo
-
-1. Build the contract by running, in the project folder, `npm run compile`
-2. Create a new workspace in Ganache by running `ganache --port 8545 --wallet.seed "31612E" --accounts 10 --defaultBalanceEther 100`. This will create a local Ethereum blockchain on `http://127.0.0.1:8545` with 10 accounts with 100 ETH on them.
-
-> [!WARNING]
-> Do not close the window unless you are running Ganache in deamon mode.
-
-> [!WARNING]
-> The first two addresses, `0x40271F69d03387d2C4868B01F8b003D91c247358` and `0xB4627216F33ADfe1d521243f73a884E40368F8A0`, are reserved. The first address is used to deploy the contract and is then discarded to avoid affecting the balance of the other addresses. The second address represents the (new) owner.
 
 # Contacts
 

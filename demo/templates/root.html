@@ -5,24 +5,31 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
-        <link rel="stylesheet" href="styles/styles.css">
-        <link rel="stylesheet" href="styles/satoshi.css">
-
-        <link id="page-icon" rel="icon" href="assets/logo-light-mode.png" type="image/png">
+        <link rel="stylesheet" href="static/styles/styles.css">
+        <link rel="stylesheet" href="static/styles/satoshi.css">
+        
+        <link id="page-icon" rel="icon" href="static/assets/logo-light-mode.png" type="image/png">
 
         <title>BitBlocker</title>
     </head>
 
     <body>
         
+        <div id="popup" class="modal">
+            <div class="modal-content">
+                <span id="popup-close">&times;</span>
+                <p id="popup-message"></p>
+            </div>
+        </div>
+
         <div class="top-bar">
-            <div class="logo"><img src="assets/logo-extended-light-mode.png" alt="Logo"></div>
+            <div class="logo"><img src="static/assets/logo-extended-light-mode.png" alt="Logo"></div>
             <a class="launch-app">Launch App</a>
         </div>
 
         <div>
             <div class="container panel">
-                <img id="text-svg" width="50%" src="assets/slogan.svg" alt="">
+                <img id="text-svg" width="50%" src="static/assets/slogan.svg" alt="">
             </div>
             
 
@@ -114,14 +121,22 @@
                     </div>
                 </div>
             </section>
+
+            <section class="section">
+                <div class="content">
+                    <h1>Ready to take the <br><span class="primary">next step</span>?</h1>
+                    <a class="launch-app big">Launch App</a>
+                </div>
+            </section>
             
         </div>
 
         <script src='https://unpkg.co/gsap@3/dist/gsap.min.js'></script>
         <script src='https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js'></script>
 
-        <script  src="scripts/slogan.js"></script>
-        <script  src="scripts/frontend.js"></script>
+        <script  src="static/scripts/slogan.js"></script>
+        <script  src="static/scripts/frontend.js"></script>
+        <script  src="static/scripts/metamask.js"></script>
 
     </body>
 </html>

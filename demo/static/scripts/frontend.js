@@ -10,8 +10,8 @@ const topBar_border_light = "1px solid rgba(225, 225, 225)";
 const launchAppButton_backgroundColor_light = "black";
 const launchAppButton_color_light = "white";
 
-const logoImg_light = "assets/logo-extended-light-mode.png";
-const pageIcon_light = "assets/logo-light-mode.png";
+const logoImg_light = "static/assets/logo-extended-light-mode.png";
+const pageIcon_light = "static/assets/logo-light-mode.png";
 
 // Dark theme
 var hasSwitchedToDark = false;
@@ -22,8 +22,8 @@ const topBar_border_dark = "1px solid rgba(30, 30, 30)";
 const launchAppButton_backgroundColor_dark = "white";
 const launchAppButton_color_dark = "black";
 
-const logoImg_dark = "assets/logo-dark-mode.png";
-const pageIcon_dark = "assets/logo-dark-mode.png";
+const logoImg_dark = "static/assets/logo-dark-mode.png";
+const pageIcon_dark = "static/assets/logo-dark-mode.png";
 
 // Animated values logic
 function animateValue(obj, start, end, duration) {
@@ -144,7 +144,7 @@ function switchTheme(force) {
 }
 
 // Init
-function init() {
+function initMetaMask() {
     observeAnimatedValues();
 
     window.addEventListener("scroll", switchTheme);
@@ -168,4 +168,4 @@ function init() {
 }
 
 // Start when document is loaded
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", initMetaMask);

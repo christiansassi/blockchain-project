@@ -1,3 +1,4 @@
+/* GLOBAL STYLES */
 html {
     scroll-behavior: smooth;
 }
@@ -5,9 +6,9 @@ html {
 body {
     font-family: "Satoshi-Medium", sans-serif;
     font-size: 16px;
-    overflow-x: hidden;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
 }
 
 /* TOP BAR */
@@ -35,36 +36,45 @@ body {
     white-space: nowrap;
 }
 
+/* BUTTON STYLES */
 .launch-app {
-    display: inline-block;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
     height: 48px;
     width: 120px;
-    line-height: 48px;
     background-color: black;
     color: white;
-    text-align: center;
     font-size: 18px;
     white-space: nowrap;
     padding: 0 20px;
+    text-align: center;
     text-decoration: none;
     border-radius: 100vw;
     transition: transform 0.2s;
 }
 
-.launch-app:active {
-    transform: scale(0.95);
-    font-size: 17px;
-}
-
 .launch-app:hover {
     font-weight: 900;
     cursor: pointer;
-    
     color: black;
     background-color: #22fe1a;
 }
 
-/* BODY */
+.launch-app:active {
+    transform: scale(0.95);
+}
+
+.launch-app.big {
+    width: 180px;
+    height: 72px;
+    font-size: 24px;
+    background-color: #22fe1a;
+    color: black;
+    user-select: none;
+}
+
+/* CONTENT LAYOUT */
 .container {
     position: relative;
     height: 100vh;
@@ -73,11 +83,6 @@ body {
     align-items: center;
     overflow: hidden;
     user-select: none;
-}
-
-#text-svg {
-    position: absolute;
-    will-change: transform;
 }
 
 .section {
@@ -122,7 +127,7 @@ p {
     line-height: 1.5;
 }
 
-/* FLEXIBLE ROWS */
+/* FLEX LAYOUT */
 .row {
     display: flex;
     justify-content: space-between;
@@ -132,19 +137,19 @@ p {
     text-align: center;
 }
 
-/* BOX LAYOUT */
+/* CARD STYLES */
 .cards {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
     gap: 20px;
+    padding: 20px;
 }
 
 .card {
-    background-color: rgb(13, 13, 13);
+    background-color: #0d0d0d;
     border-radius: 33px;
     padding: 40px;
     height: 270px;
@@ -165,25 +170,68 @@ p {
     line-height: 1.25;
 }
 
-/* PRIMARY COLOR */
-.primary {
-    color: #22fe1a;
-}
-
-/* Keyframes for the animation */
+/* ANIMATIONS */
 @keyframes fadeInMoveUp {
-0% {
-    opacity: 0;
-    transform: translateY(60px);
+    0% {
+        opacity: 0;
+        transform: translateY(60px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-100% {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-}
 .animated-element {
     opacity: 0;
     animation: fadeInMoveUp 1.45s ease-in forwards;
+}
+
+/* MODAL STYLES */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%;
+}
+
+#popup-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+#popup-close:hover,
+#popup-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* DISABLE INTERACTIONS */
+body.modal-open {
+    overflow: hidden;
+}
+
+body.modal-open .modal,
+body.modal-open .modal-content {
+    pointer-events: auto;
+}
+
+/* PRIMARY COLOR */
+.primary {
+    color: #22fe1a;
 }
