@@ -40,7 +40,7 @@ body {
 }
 
 /* BUTTON STYLES */
-.launch-app {
+.run-demo {
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -57,18 +57,18 @@ body {
     transition: transform 0.2s;
 }
 
-.launch-app:hover {
+.run-demo:hover {
     font-weight: 900;
     cursor: pointer;
     color: black;
     background-color: #22fe1a;
 }
 
-.launch-app:active {
+.run-demo:active {
     transform: scale(0.95);
 }
 
-.launch-app.big {
+.run-demo.big {
     width: 180px;
     height: 72px;
     font-size: 24px;
