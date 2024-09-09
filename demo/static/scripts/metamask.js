@@ -67,6 +67,6 @@ window.onclick = function(event) {
     }
 }
 
-document.getElementsByClassName("launch-app")[0].addEventListener("click", async () => {
+document.getElementsByClassName("run-demo")[0].addEventListener("click", async () => {
     initMetaMask();
 });

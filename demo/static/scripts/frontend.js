@@ -7,8 +7,8 @@ var hasSwitchedToLight = false;
 const topBar_backgroundColor_light = "white";
 const topBar_border_light = "1px solid rgba(225, 225, 225)";
 
-const launchAppButton_backgroundColor_light = "black";
-const launchAppButton_color_light = "white";
+const runDemoButton_backgroundColor_light = "black";
+const runDemoButton_color_light = "white";
 
 const logoImg_light = "static/assets/logo-extended-light-mode.png";
 const pageIcon_light = "static/assets/logo-light-mode.png";
@@ -19,8 +19,8 @@ var hasSwitchedToDark = false;
 const topBar_backgroundColor_dark = "black";
 const topBar_border_dark = "1px solid rgba(30, 30, 30)";
 
-const launchAppButton_backgroundColor_dark = "white";
-const launchAppButton_color_dark = "black";
+const runDemoButton_backgroundColor_dark = "white";
+const runDemoButton_color_dark = "black";
 
 const logoImg_dark = "static/assets/logo-dark-mode.png";
 const pageIcon_dark = "static/assets/logo-dark-mode.png";
@@ -93,9 +93,9 @@ function switchToLight(force) {
 
     if(!isHovering)
     {
-        const launchAppButton = document.getElementsByClassName("launch-app")[0];
-        launchAppButton.style.backgroundColor = launchAppButton_backgroundColor_light;
-        launchAppButton.style.color = launchAppButton_color_light;
+        const runDemoButton = document.getElementsByClassName("run-demo")[0];
+        runDemoButton.style.backgroundColor = runDemoButton_backgroundColor_light;
+        runDemoButton.style.color = runDemoButton_color_light;
     }
 
     const logoImg = document.getElementsByClassName("logo")[0].getElementsByTagName("img")[0];
@@ -118,9 +118,9 @@ function switchToDark(force) {
 
     if(!isHovering)
     {
-        const launchAppButton = document.getElementsByClassName("launch-app")[0];
-        launchAppButton.style.backgroundColor = launchAppButton_backgroundColor_dark;
-        launchAppButton.style.color = launchAppButton_color_dark;
+        const runDemoButton = document.getElementsByClassName("run-demo")[0];
+        runDemoButton.style.backgroundColor = runDemoButton_backgroundColor_dark;
+        runDemoButton.style.color = runDemoButton_color_dark;
     }
 
     const logoImg = document.getElementsByClassName("logo")[0].getElementsByTagName("img")[0];
@@ -151,7 +151,7 @@ function initMetaMask() {
     switchTheme();
 
     // Fix hover problem
-    const element = document.getElementsByClassName("launch-app")[0];
+    const element = document.getElementsByClassName("run-demo")[0];
 
     element.addEventListener('mouseover', () => {
         isHovering = true;
