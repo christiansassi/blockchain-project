@@ -1,0 +1,132 @@
+/* GLOBAL STYLES */
+html {
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+}
+
+body {
+    font-family: "Satoshi-Medium", sans-serif;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    background-color: black;
+}
+
+/* CONTENT LAYOUT */
+.container {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    user-select: none;
+    background-color: black;
+}
+
+/* CARD STYLES */
+.cards {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch; /* Make cards the same height */
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 20px;
+    padding: 20px;
+}
+
+.card {
+    background-color: rgb(13, 13, 13);
+    border-radius: 33px;
+    padding: 40px;
+    width: 400px;
+    display: flex;
+    flex-direction: column; /* Stack content vertically */
+    justify-content: space-between; /* Push text to top and button to bottom */
+    text-align: center;
+    animation: fadeInMoveUp 0.8s ease-in forwards;
+    transition: transform 0.1s ease-in-out; /* Smooth shrink effect */
+}
+
+.card h1 {
+    font-size: 34px;
+    font-weight: bold;
+    margin-bottom: 20px; /* Adjust spacing */
+    color: white;
+}
+
+.card p {
+    font-size: 24px;
+    line-height: 1.25;
+    color: white;
+    transition: color 0.3s ease; /* Smooth transition for text color */
+    margin-bottom: 80px; /* Add more space between <p> and button */
+}
+
+.run-demo {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    height: 48px;
+    width: 120px;
+    background-color: black;
+    color: white;
+    font-size: 18px;
+    white-space: nowrap;
+    padding: 0 20px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 100vw;
+    transition: transform 0.2s;
+    margin: 0 auto; /* Center-align the button */
+}
+
+.run-demo:hover {
+    font-weight: 900;
+    cursor: pointer;
+    color: black;
+    background-color: #22fe1a;
+}
+
+.run-demo:active {
+    transform: scale(0.95);
+}
+
+.run-demo.big {
+    width: auto; /* Allow the width to adjust based on padding */
+    height: 64px;
+    font-size: 24px;
+    background-color: white;
+    color: black;
+    user-select: none;
+    padding: 0 32px; /* Add equal padding on left and right */
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 100vw;
+    transition: transform 0.2s;
+    margin: 0 auto; /* Center the button */
+}
+
+.run-demo.big:hover {
+    background-color: #22fe1a;
+}
+
+/* ANIMATIONS */
+@keyframes fadeInMoveUp {
+    0% {
+        opacity: 0;
+        transform: translateY(60px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animated-element {
+    opacity: 0;
+    animation: fadeInMoveUp 1.45s ease-in forwards;
+}

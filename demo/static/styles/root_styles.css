@@ -72,9 +72,13 @@ body {
     width: 180px;
     height: 72px;
     font-size: 24px;
-    background-color: #22fe1a;
+    background-color: white;
     color: black;
     user-select: none;
+}
+
+.run-demo.big:hover {
+    background-color: #22fe1a;
 }
 
 /* CONTENT LAYOUT */

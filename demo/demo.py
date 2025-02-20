@@ -13,5 +13,10 @@ app = Flask(__name__, template_folder=join(getcwd(),"templates"), static_folder=
 def root():
     return render_template('root.html')
 
+# Demo
+@app.route("/demo")
+def demo():
+    return render_template('demo.html')
+
 # Run server
 app.run()
