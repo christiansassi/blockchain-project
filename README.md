@@ -94,7 +94,7 @@ python demo.py
 
 # Contacts
 
-Matteo Beltrami - [matteo.beltrami-1@studenti.unitn.it](mailto:pietro.bologna@studenti.unitn.it)
+Matteo Beltrami - [matteo.beltrami-1@studenti.unitn.it](mailto:matteo.beltrami-1@studenti.unitn.it)
 
 Luca Pedercini - [luca.pedercini@studenti.unitn.it](mailto:luca.pedercini@studenti.unitn.it)
 
