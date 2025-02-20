@@ -22,7 +22,7 @@ const topBar_border_dark = "1px solid rgba(30, 30, 30)";
 const runDemoButton_backgroundColor_dark = "white";
 const runDemoButton_color_dark = "black";
 
-const logoImg_dark = "static/assets/logo-dark-mode.png";
+const logoImg_dark = "static/assets/logo-extended-dark-mode.png";
 const pageIcon_dark = "static/assets/logo-dark-mode.png";
 
 // Animated values logic
