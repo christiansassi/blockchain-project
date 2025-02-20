@@ -52,11 +52,11 @@ You can run one of the following commands:
 
 ```bash
 # Rebuild the contract before running the tests
-npm run test:build
+npm run tests:compile
 
 # To run the tests. 
 # Note that if the contract is not compiled, Hardhat will compile it for you
-npm run test
+npm run tests
 ```
 
 ## Play with the contract
@@ -72,6 +72,25 @@ You can now test the contract's functions by expanding the contract window withi
 
 > [!TIP]
 > If you would like to reset the wallets (e.g., restore the balances), simply select and reselect the same environment (e.g., `Remix VM (Shanghai)`).
+
+## Run the Demo
+
+1. Run Ganache on `localhost` (port `8545`) with the specified mnemonic to initialize accounts:
+```bash
+ganache -h 0.0.0.0 -p 8545 --mnemonic "museum coin tiger catalog dutch doll daring toddler festival cushion fuel nest"
+```
+2. In the Remix IDE:
+    - Open the Solidity contract.
+    - Click on `Solidity Compiler` in the left sidebar and compile the contract.
+    - Click on `Deploy & Run Transactions` in the left sidebar and set the environment to `Custom - External Http Provider`. 
+    - In the popup window, enter the Ganache RPC URL: `http://127.0.0.1:8545`.
+    - Click `Deploy` to deploy the contract.
+
+3. Execute the [demo.py](demo/demo.py) script:
+
+```bash
+python demo.py
+```
 
 # Contacts
 
