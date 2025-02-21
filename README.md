@@ -1,3 +1,28 @@
+<div style="text-align: center;">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="demo/static/assets/logo-extended-dark-mode.png">
+        <img alt="https://www.unitn.it/" src="demo/static/assets/logo-extended-light-mode.png" width="50%">
+    </picture>
+</div>
+
+# Table of Contents
+
+1. [Installation and Configuration](#installation-and-configuration)  
+   - [Node.js](#nodejs)  
+   - [Python](#python)  
+   - [Ganache](#ganache)  
+   - [Remix - Ethereum IDE](#remix---ethereum-ide)  
+     - [Remix Desktop IDE (preferred)](#remix-desktop-ide-preferred)  
+     - [Remix Online IDE](#remix-online-ide)  
+   - [MetaMask](#metamask)  
+
+2. [Getting Started](#getting-started)  
+   - [Running Tests](#running-tests)  
+   - [Play with the Contract](#play-with-the-contract)  
+   - [Run the Demo](#run-the-demo)  
+
+3. [Contacts](#contacts)
+
 # Installation and Configuration
 
 First, clone this repository by running `git clone https://github.com/christiansassi/blockchain-project`
