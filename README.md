@@ -1,9 +1,9 @@
-<div style="text-align: center;">
+<p align="center">
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="demo/static/assets/logo-extended-dark-mode.png">
         <img alt="https://www.unitn.it/" src="demo/static/assets/logo-extended-light-mode.png" width="50%">
     </picture>
-</div>
+</p>
 
 # Table of Contents
 
