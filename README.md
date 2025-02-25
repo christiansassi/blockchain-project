@@ -117,6 +117,17 @@ ganache -h 0.0.0.0 -p 8545 --mnemonic "museum coin tiger catalog dutch doll dari
 python demo.py
 ```
 
+4. Click on *Run demo* on the main page to start the demo.  
+5. A new window will open, prompting you to choose which entity to impersonate: **Seller** or **Buyer**.  
+   - Since this is a demo, it is recommended to open two separate browser windows so you can impersonate both roles simultaneously.  
+6. After selecting an entity, you will be redirected to the corresponding interface. A MetaMask popup will appear, where you need to:  
+   - Select the account you want to use (make sure it has been added as explained in the previous steps).  
+   - Choose the appropriate network—select **Localhost 8545**.  
+
+   To ensure a smooth experience, it is recommended to:  
+   - Deselect all other accounts except the one created with Ganache.  
+   - Deselect all networks except the Ganache network.  
+
 # Contacts
 
 Matteo Beltrami - [matteo.beltrami-1@studenti.unitn.it](mailto:matteo.beltrami-1@studenti.unitn.it)
