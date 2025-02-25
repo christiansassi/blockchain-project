@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0
-
 pragma solidity ^0.8.19;
 
 contract BitBlocker {
@@ -205,7 +204,7 @@ contract BitBlocker {
 
         require(!order.completed, "Order already completed");
 
-        require(order.refundState != RefundState.pending, "A refund has been requested. Wait untill it will be accepted or declined");
+        require(order.refundState != RefundState.pending, "A refund has been requested. Wait until it is accepted or declined");
         require(order.refundState != RefundState.accepted, "A refund has been requested and accepted");
         require(order.refundState != RefundState.declined, "A refund has been requested and declined");
 
@@ -323,7 +322,7 @@ contract BitBlocker {
         else 
         {
             // If there is a pending refund request, seller cannot collect the order. He has to wait until the owner accept or decline it
-            require(order.refundState != RefundState.pending, "A refund has been requested. Wait untill it will be accepted or declined");
+            require(order.refundState != RefundState.pending, "A refund has been requested. Wait until it is accepted or declined");
 
             // If a refund has been requested and accepted, it means that funds are destinated to the buyer and only him can set the order as completed
             require(order.refundState != RefundState.accepted, "A refund has been requested and accepted. You cannot collect your order");
@@ -367,7 +366,7 @@ contract BitBlocker {
         else
         {
             // If there is a pending refund request, buyer cannot collect funds (yet)
-            require(order.refundState != RefundState.pending, "A refund has been requested. Wait untill it will be accepted or declined");
+            require(order.refundState != RefundState.pending, "A refund has been requested. Wait until it is accepted or declined");
 
             // If a refund has been requested and declined, it means that funds are destinated to the seller and only him can set the order as completed
             require(order.refundState != RefundState.declined, "A refund has been requested and declined. You cannot collect your funds");
