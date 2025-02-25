@@ -58,7 +58,6 @@ body {
 }
 
 .run-demo:hover {
-    font-weight: 900;
     cursor: pointer;
     color: black;
     background-color: #22fe1a;
@@ -66,6 +65,7 @@ body {
 
 .run-demo:active {
     transform: scale(0.95);
+    font-weight: 900;
 }
 
 .run-demo.big {
