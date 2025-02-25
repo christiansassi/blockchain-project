@@ -58,14 +58,13 @@ First, clone this repository by running `git clone https://github.com/christians
 
 1. Download and intsall MetaMask from [here](https://metamask.io/download/).
 2. Click on `Import an existing wallet` and enter the following mnemonic phrase: `museum coin tiger catalog dutch doll daring toddler festival cushion fuel nest`. This mnemonic will be used by Ganache when you run the demo.
-3. Click on `+ Add Network > Add a network manually` and set the following:
+3. Click on `+ Add Network > Add a custom network` and set the following:
    - **Network Name**: `Ganache`
    - **RPC URL**: `http://127.0.0.1:8545`
    - **Chain ID**: `1337`
    - **Currency Symbol**: `ETH`
 
-By default, MetaMask will add the address at index 0, which is `0x40271F69d03387d2C4868B01F8b003D91c247358`. To use other addresses, go to MetaMask and click `+ Add account or hardware wallet > Import account`. Copy and paste the private key for the chosen account. For example, to import the second account (index 1), use the private key `0x8e2b0a8ad2a6c502ea7b37273f2070e7e01ab6d08059c94076d6c5f58e3000c3`, as shown in the Ganache console when you run the local Ethereum blockchain.
-
+By default, MetaMask will add the address at index 0, which is `0x40271F69d03387d2C4868B01F8b003D91c247358`. To use other addresses, go to MetaMask and click `+ Add account or hardware wallet > Import account`. Copy and paste the private key for the chosen account. For example, to import the second account (index 1), use the private key `0x8e2b0a8ad2a6c502ea7b37273f2070e7e01ab6d08059c94076d6c5f58e3000c3`, as shown in the Ganache console when you run the local Ethereum blockchain. Alternatively, you can click on `Add new Ethereum account`, and MetaMask will automatically select the next available account in order from the generated ones.  
 
 # Getting Started
 
@@ -117,16 +116,17 @@ ganache -h 0.0.0.0 -p 8545 --mnemonic "museum coin tiger catalog dutch doll dari
 python demo.py
 ```
 
-4. Click on *Run demo* on the main page to start the demo.  
+4. Click on `Run demo` on the main page to start the demo.  
 5. A new window will open, prompting you to choose which entity to impersonate: **Seller** or **Buyer**.  
    - Since this is a demo, it is recommended to open two separate browser windows so you can impersonate both roles simultaneously.  
 6. After selecting an entity, you will be redirected to the corresponding interface. A MetaMask popup will appear, where you need to:  
    - Select the account you want to use (make sure it has been added as explained in the previous steps).  
-   - Choose the appropriate network—select **Localhost 8545**.  
+   - Choose the appropriate network—select `Ganache`. Be sure to have `Show test networks` checked.  
 
-   To ensure a smooth experience, it is recommended to:  
-   - Deselect all other accounts except the one created with Ganache.  
-   - Deselect all networks except the Ganache network.  
+   ⚠️ To ensure a smooth experience, it is recommended to:  
+   - **Deselect all other accounts except the one created with Ganache**. 
+   - **Deselect all networks except the Ganache network**.  
+   - **Make sure that only MetaMask is installed, or that it is set as the default wallet.** Otherwise, other wallets may interfere with the demo, causing it to malfunction. For example, if both MetaMask and Phantom are installed, Phantom may appear when the demo attempts to open the wallet popup. If you close the Phantom popup, the page may not handle the event correctly, disrupting the demo flow. While this issue could be addressed, it is beyond the scope of this project, as the demo is designed specifically for MetaMask.
 
 # Contacts
 
