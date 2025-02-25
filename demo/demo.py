@@ -18,5 +18,15 @@ def root():
 def demo():
     return render_template('demo.html')
 
+# Buyer
+@app.route("/buyer")
+def buyer():
+    return render_template('buyer.html')
+
+# Seller
+@app.route("/seller")
+def seller():
+    return render_template('seller.html')
+
 # Run server
 app.run()
