@@ -329,7 +329,7 @@ contract BitBlocker {
             require(order.refundState != RefundState.accepted, "A refund has been requested and accepted. You cannot collect your order");
 
             // A seller cannot claim his order before the expiry date
-            require(order.expiryDate < block.timestamp, "You cannot collect your order yet");
+            require(order.expiryDate <= block.timestamp, "You cannot collect your order yet");
         }
 
         // Set order as completed
@@ -341,7 +341,8 @@ contract BitBlocker {
         // Keep track of fees
         fees = fees + (order.price - amount);
 
-        payable(msg.sender).transfer(amount);
+        (bool success, ) = payable(msg.sender).call{value: amount}("");
+        require(success, "Transfer failed");
     }
 
     /**
@@ -379,7 +380,8 @@ contract BitBlocker {
         order.completed = true;
 
         // Transfer funds to the seller
-        payable(msg.sender).transfer(order.price);
+        (bool success, ) = payable(msg.sender).call{value: order.price}("");
+        require(success, "Transfer failed");
     }
 
     /**
@@ -392,7 +394,8 @@ contract BitBlocker {
         uint amount = fees;
         fees = 0;
 
-        payable(msg.sender).transfer(amount);
+        (bool success, ) = payable(msg.sender).call{value: amount}("");
+        require(success, "Fee transfer failed");
     }
 
     /**
