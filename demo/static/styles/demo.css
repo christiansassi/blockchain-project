@@ -1,4 +1,3 @@
-/* GLOBAL STYLES */
 html {
     scroll-behavior: smooth;
     overscroll-behavior: none;
@@ -12,6 +11,7 @@ body {
     overflow-x: hidden;
     overscroll-behavior: none;
     background-color: black;
+    user-select: none;
 }
 
 .top-bar {
@@ -38,7 +38,6 @@ body {
     white-space: nowrap;
 }
 
-/* CONTENT LAYOUT */
 .container {
     position: relative;
     height: 100vh;
@@ -50,11 +49,10 @@ body {
     background-color: black;
 }
 
-/* CARD STYLES */
 .cards {
     display: flex;
     justify-content: space-between;
-    align-items: stretch; /* Make cards the same height */
+    align-items: stretch;
     max-width: 1200px;
     margin: 0 auto;
     gap: 20px;
@@ -63,21 +61,21 @@ body {
 
 .card {
     background-color: rgb(13, 13, 13);
-    border-radius: 33px;
-    padding: 40px;
+    border-radius: 48px;
+    padding: 24px;
     width: 400px;
     display: flex;
-    flex-direction: column; /* Stack content vertically */
-    justify-content: space-between; /* Push text to top and button to bottom */
+    flex-direction: column;
+    justify-content: space-between;
     text-align: center;
     animation: fadeInMoveUp 0.8s ease-in forwards;
-    transition: transform 0.1s ease-in-out; /* Smooth shrink effect */
+    transition: transform 0.1s ease-in-out;
 }
 
 .card h1 {
     font-size: 34px;
     font-weight: bold;
-    margin-bottom: 20px; /* Adjust spacing */
+    margin-bottom: 20px;
     color: white;
 }
 
@@ -85,8 +83,8 @@ body {
     font-size: 24px;
     line-height: 1.25;
     color: white;
-    transition: color 0.3s ease; /* Smooth transition for text color */
-    margin-bottom: 80px; /* Add more space between <p> and button */
+    transition: color 0.3s ease;
+    margin-bottom: 80px;
 }
 
 .run-demo {
@@ -94,7 +92,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 48px;
-    width: 120px;
+    width: 100%;
     background-color: black;
     color: white;
     font-size: 18px;
@@ -102,9 +100,10 @@ body {
     padding: 0 20px;
     text-align: center;
     text-decoration: none;
-    border-radius: 100vw;
+    border-radius: 24px;
     transition: transform 0.2s;
-    margin: 0 auto; /* Center-align the button */
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
 .run-demo:hover {
@@ -119,26 +118,19 @@ body {
 }
 
 .run-demo.big {
-    width: auto; /* Allow the width to adjust based on padding */
     height: 64px;
     font-size: 24px;
     background-color: white;
     color: black;
     user-select: none;
-    padding: 0 32px; /* Add equal padding on left and right */
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 100vw;
-    transition: transform 0.2s;
-    margin: 0 auto; /* Center the button */
+    padding: 0 32px;
+    border-radius: 24px;
 }
 
 .run-demo.big:hover {
     background-color: #22fe1a;
 }
 
-/* ANIMATIONS */
 @keyframes fadeInMoveUp {
     0% {
         opacity: 0;

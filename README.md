@@ -1,7 +1,7 @@
 <p align="center">
     <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="demo/static/assets/logo-extended-dark-mode.png">
-        <img alt="https://www.unitn.it/" src="demo/static/assets/logo-extended-light-mode.png" width="75%">
+        <source media="(prefers-color-scheme: dark)" srcset="demo/static/assets/logo/logo-extended-dark-mode.png">
+        <img alt="https://www.unitn.it/" src="demo/static/assets/logo/logo-extended-light-mode.png" width="75%">
     </picture>
 </p>
 

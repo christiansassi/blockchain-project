@@ -11,6 +11,7 @@ body {
     overflow-x: hidden;
     overscroll-behavior: none;
     background-color: black;
+    user-select: none;
 }
 
 .top-bar {
@@ -78,4 +79,156 @@ body.modal-open {
 body.modal-open .modal,
 body.modal-open .modal-content {
     pointer-events: auto;
+}
+
+.container {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    user-select: none;
+    background-color: white;
+}
+
+.section {
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    position: relative;
+    text-align: center;
+    z-index: 10;
+}
+
+.content {
+    max-width: 1200px;
+    padding: 20px;
+    margin: 0 auto;
+    opacity: 0;
+}
+
+h1, h2, p {
+    margin: 0;
+}
+
+h1 {
+    font-size: 96px;
+    font-weight: 900;
+    margin-bottom: 48px;
+    line-height: 1.25;
+}
+
+h2 {
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+p {
+    font-size: 24px;
+    line-height: 1.5;
+}
+
+.cards {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 20px;
+    padding: 20px;
+}
+
+.card {
+    background-color: rgb(13, 13, 13);
+    border-radius: 33px;
+    padding: 40px;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    animation: fadeInMoveUp 0.8s ease-in forwards;
+    transition: transform 0.1s ease-in-out;
+}
+
+.card h1 {
+    font-size: 34px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.card p {
+    font-size: 24px;
+    line-height: 1.25;
+    color: white;
+    transition: color 0.3s ease;
+    margin-bottom: 80px;
+}
+
+.run-demo {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    height: 48px;
+    width: 120px;
+    background-color: black;
+    color: white;
+    font-size: 18px;
+    white-space: nowrap;
+    padding: 0 20px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 100vw;
+    transition: transform 0.2s;
+}
+
+.run-demo:hover {
+    cursor: pointer;
+    color: black;
+    background-color: #22fe1a;
+}
+
+.run-demo:active {
+    transform: scale(0.95);
+    font-weight: 900;
+}
+
+.run-demo.big {
+    width: 180px;
+    height: 72px;
+    font-size: 24px;
+    background-color: white;
+    color: black;
+    user-select: none;
+}
+
+.run-demo.big:hover {
+    background-color: #22fe1a;
+}
+
+@keyframes fadeInMoveUp {
+    0% {
+        opacity: 0;
+        transform: translateY(60px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animated-element {
+    opacity: 0;
+    animation: fadeInMoveUp 1.45s ease-in forwards;
+}
+
+.primary {
+    color: #22fe1a;
 }
