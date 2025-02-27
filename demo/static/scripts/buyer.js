@@ -15,7 +15,6 @@ async function update_prices() {
     const eth_price = await get_eth_price(); // Fetch ETH price
 
     let a = 0.01 / eth_price;
-    let b = a;
     let c = (a.toString().split('.')[1] || '').length;
 
     // Reduce the decimal precision progressively
@@ -225,12 +224,12 @@ async function init_price_updates() {
     let progress = 0;
     let max_progress = 5;
     
-    //update_progress_bar(progress, max_progress);
+    update_progress_bar(progress, max_progress);
     await update_prices();
 
     setInterval(async () => {
 
-        //update_progress_bar(progress, max_progress);
+        update_progress_bar(progress, max_progress);
 
         if(progress == max_progress) {
             progress = 0;
