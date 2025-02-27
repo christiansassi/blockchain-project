@@ -88,21 +88,73 @@ body.modal-open .modal-content {
     margin-top: 60px;
 }
 
+/* Card flip container */
 .product-card {
-    background: #0d0d0d;
-    padding: 20px;
+    background: black;
     border-radius: 24px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    transition: transform 0.2s;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
     color: white;
+    perspective: 1000px; /* 3D effect */
+    height: 400px; /* Increased fixed height for consistent flipping and to accommodate button */
+    cursor: pointer;
 }
 
 .product-card:hover {
     transform: scale(1.05);
+    transition: transform 0.2s;
+}
+
+/* Card inner container for flip effect */
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.product-card.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+/* Position the front and back sides */
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    padding: 20px;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    background: #0d0d0d;
+}
+
+.card-back {
+    transform: rotateY(180deg);
+    background: #151515;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.card-back h3 {
+    margin-bottom: 20px;
+}
+
+.card-back-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+    line-height: 1.6;
 }
 
 .product-image {
@@ -115,7 +167,7 @@ body.modal-open .modal-content {
 
 h3 {
     font-size: 24px;
-    margin: 5px 0;
+    margin: 0px 0;
 }
 
 .stars {
@@ -127,7 +179,7 @@ h3 {
 .price {
     font-size: 18px;
     font-weight: bold;
-    margin: 5px 0 20px;
+    margin: 0px 0 16px;
     display: flex; /* Ensures full alignment */
     justify-content: center; /* Center aligns within the flex container */
     align-items: center; /* Aligns items properly */
@@ -157,9 +209,8 @@ button {
     font-size: 18px;
     border-radius: 12px;
     cursor: pointer;
-    margin-top: 20px;
     width: 100%;
-    flex-grow: 1;
+    margin-top: 0px; /* Push to bottom of container */
 }
 
 button:hover {
@@ -168,4 +219,10 @@ button:hover {
 
 button:active {
     font-weight: 700;
+}
+
+/* Ensure the Buy button doesn't flip the card */
+.buy-btn {
+    position: relative;
+    z-index: 10;
 }
