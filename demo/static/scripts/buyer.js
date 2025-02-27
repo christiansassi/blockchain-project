@@ -1,3 +1,50 @@
+async function get_eth_price() {
+    const url = 'https://api.binance.com/api/v3/ticker/price?symbol=ETHEUR';
+
+    try {
+
+        const response = await fetch(url);
+        const data = await response.json();
+        return data.price;
+
+    } catch (error) {
+        console.error('Error fetching ETH price:', error);
+        return null;
+    }
+}
+
+async function update_prices() {
+    const eth_price = await get_eth_price(); // Fetch ETH price
+
+    let a = 0.01 / eth_price;
+    let b = a;
+    let c = (a.toString().split('.')[1] || '').length;
+
+    // Reduce the decimal precision progressively
+    while (true) {
+
+        if((parseFloat(a.toFixed(c)) * eth_price).toFixed(2) !== "0.01")
+        {
+            c = c + 1;
+            break;
+        }
+
+        c--; // Decrease precision until the amount changes
+    }
+
+    console.log(eth_price);
+
+    // Loop through elements with class "price"
+    Array.from(document.getElementsByClassName("price-amount")).forEach(item => {
+        // Calculate price in ETH
+        let price_in_eth = item.attributes["price"].value / eth_price;
+
+        // Update the text with price in ETH using template literals
+        item.innerText = parseFloat(price_in_eth.toFixed(c));
+    });
+}
+
+
 // Helper function to generate a random number between min and max
 const getRandomArbitrary = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 
@@ -59,9 +106,23 @@ products.forEach(product => {
         <img src="${product[0]}" alt="Product Image" class="product-image">
         <h3>${product[1]}</h3>
         <p>${getRandomStars()}</p>
-        <p class="price">€${randomPrice}</p>
+        <p class="price">
+            <span class="price-amount" price=${randomPrice}>-</span>
+            <span class="eth-symbol"><img src="static/assets/eth/colored.svg" alt="ETH" class="eth-logo"></span>
+        </p>
         <button>Buy</button>
     `;
 
     grid.appendChild(card);
 });
+
+async function init_price_updates() {
+
+    await update_prices();
+
+    setInterval(async () => {
+        await update_prices();
+    }, 5000);
+}
+
+init_price_updates();

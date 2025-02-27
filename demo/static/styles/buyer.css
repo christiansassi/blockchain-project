@@ -84,7 +84,7 @@ body.modal-open .modal-content {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
-    padding: 20px;
+    padding: 30px 80px 80px 80px;
     margin-top: 60px;
 }
 
@@ -128,6 +128,25 @@ h3 {
     font-size: 18px;
     font-weight: bold;
     margin: 5px 0 20px;
+    display: flex; /* Ensures full alignment */
+    justify-content: center; /* Center aligns within the flex container */
+    align-items: center; /* Aligns items properly */
+    gap: 5px;
+}
+
+.price-amount {
+    margin-right: 2.5px; /* Add some space between the price and the symbol */
+}
+
+.eth-symbol {
+    display: flex;
+    align-items: center;
+}
+
+.eth-logo {
+    width: 16px; /* Explicit width */
+    height: 16px; /* Explicit height */
+    display: inline-block; /* Ensures it behaves like an inline element */
 }
 
 button {
