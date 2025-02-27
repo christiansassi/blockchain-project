@@ -215,12 +215,32 @@ function setupCardFlip() {
     });
 }
 
+function update_progress_bar(value, max_value) {
+    let bar = document.getElementsByClassName("eth-bar")[0];
+    bar.style.width = parseInt(value * 100 / max_value) + '%';
+}
+
 async function init_price_updates() {
+
+    let progress = 0;
+    let max_progress = 5;
+    
+    //update_progress_bar(progress, max_progress);
     await update_prices();
 
     setInterval(async () => {
-        await update_prices();
-    }, 5000);
+
+        //update_progress_bar(progress, max_progress);
+
+        if(progress == max_progress) {
+            progress = 0;
+            await update_prices();
+        }
+        else {
+            progress = progress + 1;
+        }
+
+    }, 1000);
 }
 
 // Initialize everything
