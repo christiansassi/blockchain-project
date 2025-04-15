@@ -54,7 +54,7 @@ First, clone this repository by running `git clone https://github.com/christians
 2. Start the Remix daemon inside your project directory. Navigate to your project folder and run `remixd -s .`
 3. Open the Remix Online IDE [here](https://remix.ethereum.org/), and in the top-left corner, under the workspace section, select `connect to localhost`.
 
-## <img src="https://github.com/MetaMask/brand-resources/raw/master/SVG/SVG_MetaMask_Icon_Color.svg" width="30" style="position: relative; top: 6px; margin-right: 8px;" /> MetaMask
+## <img src="https://images.ctfassets.net/clixtyxoaeas/1ezuBGezqfIeifWdVtwU4c/d970d4cdf13b163efddddd5709164d2e/MetaMask-icon-Fox.svg" width="30" style="position: relative; top: 6px; margin-right: 8px;" /> MetaMask
 
 1. Download and intsall MetaMask from [here](https://metamask.io/download/).
 2. Click on `Import an existing wallet` and enter the following mnemonic phrase: `museum coin tiger catalog dutch doll daring toddler festival cushion fuel nest`. This mnemonic will be used by Ganache when you run the demo.
