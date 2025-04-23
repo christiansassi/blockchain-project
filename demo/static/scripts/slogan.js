@@ -27,7 +27,7 @@ tl.to("#text-svg", {
     });
 
 // Check the scroll position on page load
-window.addEventListener('load', () => {
+window.addEventListener("load", () => {
     const scrollY = window.scrollY || window.pageYOffset;
 
     if (scrollY > 2260) {
@@ -40,6 +40,6 @@ window.addEventListener('load', () => {
 });
 
 // Refresh ScrollTrigger on window resize
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
     ScrollTrigger.refresh();
 });

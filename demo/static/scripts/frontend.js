@@ -10,8 +10,8 @@ const topBar_border_light = "1px solid rgba(225, 225, 225)";
 const runDemoButton_backgroundColor_light = "black";
 const runDemoButton_color_light = "white";
 
-const logoImg_light = "static/assets/logo/logo-extended-light-mode.png";
-const pageIcon_light = "static/assets/logo/logo-light-mode.png";
+const logoImg_light = "static/assets/logo/logo-extended-light.png";
+const pageIcon_light = "static/assets/logo/logo-light.png";
 
 // Dark theme
 var hasSwitchedToDark = false;
@@ -22,8 +22,8 @@ const topBar_border_dark = "1px solid rgba(30, 30, 30)";
 const runDemoButton_backgroundColor_dark = "white";
 const runDemoButton_color_dark = "black";
 
-const logoImg_dark = "static/assets/logo/logo-extended-dark-mode.png";
-const pageIcon_dark = "static/assets/logo/logo-dark-mode.png";
+const logoImg_dark = "static/assets/logo/logo-extended-dark.png";
+const pageIcon_dark = "static/assets/logo/logo-dark.png";
 
 // Animated values logic
 function animateValue(obj, start, end, duration) {
@@ -64,7 +64,7 @@ function observeAnimatedElements() {
     const observer = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('animated-element');
+                entry.target.classList.add("animated-element");
                 observer.unobserve(entry.target);
             }
         });
@@ -72,7 +72,7 @@ function observeAnimatedElements() {
         threshold: 0.1
     });
 
-    document.querySelectorAll('.content').forEach(element => {
+    document.querySelectorAll(".content").forEach(element => {
         observer.observe(element);
     });
 
@@ -131,7 +131,7 @@ function switchToDark(force) {
 
 function switchTheme(force) {
 
-    if (typeof force !== 'boolean')
+    if (typeof force !== "boolean")
         force = false;
 
     const scrollY = window.scrollY || window.pageYOffset;
@@ -144,7 +144,7 @@ function switchTheme(force) {
 }
 
 // Init
-function initMetaMask() {
+function init() {
     observeAnimatedValues();
 
     window.addEventListener("scroll", switchTheme);
@@ -153,13 +153,13 @@ function initMetaMask() {
     // Fix hover problem
     const element = document.getElementsByClassName("run-demo")[0];
 
-    element.addEventListener('mouseover', () => {
+    element.addEventListener("mouseover", () => {
         isHovering = true;
-        element.style.backgroundColor = '#22fe1a';
-        element.style.color = 'black';
+        element.style.backgroundColor = "#22fe1a";
+        element.style.color = "black";
     });
 
-    element.addEventListener('mouseout', () => {
+    element.addEventListener("mouseout", () => {
         isHovering = false;
         switchTheme(true);
     });
@@ -168,4 +168,4 @@ function initMetaMask() {
 }
 
 // Start when document is loaded
-document.addEventListener("DOMContentLoaded", initMetaMask);
+document.addEventListener("DOMContentLoaded", init);

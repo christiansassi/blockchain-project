@@ -1,0 +1,138 @@
+{
+	"id": "1cadb5f091e75a2bd0ca9726f4e9f519",
+	"_format": "hh-sol-build-info-1",
+	"solcVersion": "0.8.29",
+	"solcLongVersion": "0.8.29+commit.ab55807c",
+	"input": {
+		"language": "Solidity",
+		"sources": {
+			"enums/OrderState.sol": {
+				"content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.24;\r\n\r\n/// @notice Enum representing the status of an order.\r\nenum OrderState {\r\n    None,\r\n    Paid,\r\n    Accepted,\r\n    Completed,\r\n    PendingRefund,\r\n    AcceptedRefund,\r\n    DeclinedRefund\r\n}\r\n"
+			}
+		},
+		"settings": {
+			"optimizer": {
+				"enabled": false,
+				"runs": 200
+			},
+			"outputSelection": {
+				"*": {
+					"": [
+						"ast"
+					],
+					"*": [
+						"abi",
+						"metadata",
+						"devdoc",
+						"userdoc",
+						"storageLayout",
+						"evm.legacyAssembly",
+						"evm.bytecode",
+						"evm.deployedBytecode",
+						"evm.methodIdentifiers",
+						"evm.gasEstimates",
+						"evm.assembly"
+					]
+				}
+			},
+			"remappings": []
+		}
+	},
+	"output": {
+		"sources": {
+			"enums/OrderState.sol": {
+				"ast": {
+					"absolutePath": "enums/OrderState.sol",
+					"exportedSymbols": {
+						"OrderState": [
+							10
+						]
+					},
+					"id": 11,
+					"license": "MIT",
+					"nodeType": "SourceUnit",
+					"nodes": [
+						{
+							"id": 1,
+							"literals": [
+								"solidity",
+								"^",
+								"0.8",
+								".24"
+							],
+							"nodeType": "PragmaDirective",
+							"src": "33:24:0"
+						},
+						{
+							"canonicalName": "OrderState",
+							"documentation": {
+								"id": 2,
+								"nodeType": "StructuredDocumentation",
+								"src": "61:55:0",
+								"text": "@notice Enum representing the status of an order."
+							},
+							"id": 10,
+							"members": [
+								{
+									"id": 3,
+									"name": "None",
+									"nameLocation": "139:4:0",
+									"nodeType": "EnumValue",
+									"src": "139:4:0"
+								},
+								{
+									"id": 4,
+									"name": "Paid",
+									"nameLocation": "150:4:0",
+									"nodeType": "EnumValue",
+									"src": "150:4:0"
+								},
+								{
+									"id": 5,
+									"name": "Accepted",
+									"nameLocation": "161:8:0",
+									"nodeType": "EnumValue",
+									"src": "161:8:0"
+								},
+								{
+									"id": 6,
+									"name": "Completed",
+									"nameLocation": "176:9:0",
+									"nodeType": "EnumValue",
+									"src": "176:9:0"
+								},
+								{
+									"id": 7,
+									"name": "PendingRefund",
+									"nameLocation": "192:13:0",
+									"nodeType": "EnumValue",
+									"src": "192:13:0"
+								},
+								{
+									"id": 8,
+									"name": "AcceptedRefund",
+									"nameLocation": "212:14:0",
+									"nodeType": "EnumValue",
+									"src": "212:14:0"
+								},
+								{
+									"id": 9,
+									"name": "DeclinedRefund",
+									"nameLocation": "233:14:0",
+									"nodeType": "EnumValue",
+									"src": "233:14:0"
+								}
+							],
+							"name": "OrderState",
+							"nameLocation": "121:10:0",
+							"nodeType": "EnumDefinition",
+							"src": "116:134:0"
+						}
+					],
+					"src": "33:219:0"
+				},
+				"id": 0
+			}
+		}
+	}
+}

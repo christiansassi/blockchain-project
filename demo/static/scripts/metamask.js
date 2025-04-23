@@ -3,11 +3,15 @@ const popupClose = document.getElementById("popup-close");
 const popupMessage = document.getElementById("popup-message");
 const modal = document.getElementsByClassName("modal-content")[0];
 
-const chainId = "0x539";
+const CHAIN_ID = "0x7a69";
 
-var accounts;
+window.web3 = null;
+window.contract = null;
 
-function show_popup(title, message) {
+function showPopup(title, message) {
+
+    document.getElementById("page-loader").style.display = "none";
+
     popupMessage.innerHTML = popupMessage.innerHTML = `
         <h3>${title}</h3>
         <p>${message}</p>
@@ -18,18 +22,18 @@ function show_popup(title, message) {
 
     popupClose.onclick = function() {
         //hide_popup();
-        go_back();
+        goBack();
     }
     
     window.onclick = function(event) {
         if (event.target === popup) {
             //hide_popup();
-            go_back();
+            goBack();
         }
     }
 }
 
-function hide_popup() {
+function hidePopup() {
     modal.style.display = "none";
     popup.style.display = "none";
     document.body.classList.remove("modal-open");
@@ -38,9 +42,18 @@ function hide_popup() {
     window.onclick = null;
 }
 
-function block_page() {
+function blockPage() {
     popup.style.display = "block";
     modal.style.display = "none";
+    document.body.classList.remove("modal-open");
+
+    popupClose.onclick = null;
+    window.onclick = null;
+}
+
+function unblockPage() {
+    popup.style.display = "none";
+    modal.style.display = "block";
     document.body.classList.remove("modal-open");
 
     popupClose.onclick = null;
@@ -57,7 +70,7 @@ async function connectMetaMask() {
     catch(error)
     {   
         if(error.code == 4001)
-            show_popup("MetaMask not connected", "Please, connect MetaMask to the website.")
+            showPopup("MetaMask not connected", "Please, connect MetaMask to the website.")
 
         return null;
     }
@@ -67,38 +80,60 @@ async function getMetaMaskNetwork() {
     return await ethereum.request({ method: "eth_chainId" });
 }
 
+async function loadContract() {
+    try {
+        // Fetch ABI JSON file
+        const response = await fetch("/static/abi/abi.json");
+        const abi = await response.json();
+
+        // Initialize Web3 and contract
+        window.web3 = new Web3(window.ethereum);
+        window.contract = new window.web3.eth.Contract(abi.abi, abi.address);
+
+    } catch (error) {
+        console.error("Error loading ABI:", error);
+    }
+}
+
 async function initMetaMask() {
 
     // Check MetaMask installation
     if(!window.ethereum) {
-        show_popup("MetaMask not installed", "Please, install MetaMask.")
+        showPopup("MetaMask not installed", "Please, install MetaMask.")
         return;
     }
 
-    accounts = await connectMetaMask();
+    window.ethereum.on("accountsChanged", (accounts) => {
+        // Reload the page when the account is changed
+        window.location.reload();
+    });
+
+    let accounts = await connectMetaMask();
 
     // If accounts is null, an error has occurred
     if(accounts === null)
     {
-        show_popup("MetaMask not connected", "Please, connect MetaMask to the website.")
+        showPopup("MetaMask not connected", "Please, connect MetaMask to the website.")
         return;
     }
 
     // Check chain. local Ethereum network uses 0x539
-    if(await getMetaMaskNetwork() !== chainId)
+    if(await getMetaMaskNetwork() !== CHAIN_ID)
     {
-        show_popup("Wrong error", "Please, connect to the appropriate network.")
+        showPopup("Wrong error", "Please, connect to the appropriate network.")
         return;
     }
 
+    await loadContract();
+    unblockPage();
+
 }
 
-function go_back() {
+function goBack() {
     if(window.location.pathname == "/buyer") {
         window.location.href = "/demo";
     }
 }
 
-block_page();
-
+blockPage();
 initMetaMask();

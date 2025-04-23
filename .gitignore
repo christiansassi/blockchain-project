@@ -2,6 +2,7 @@
 
 contracts/artifacts
 contracts/cache
+contracts/.deps
 
 hardhat
 

@@ -11,22 +11,27 @@ app = Flask(__name__, template_folder=join(getcwd(),"templates"), static_folder=
 # Home
 @app.route("/")
 def root():
-    return render_template('root.html')
+    return render_template("root.html")
 
 # Demo
 @app.route("/demo")
 def demo():
-    return render_template('demo.html')
+    return render_template("demo.html")
 
 # Buyer
 @app.route("/buyer")
 def buyer():
-    return render_template('buyer.html')
+    return render_template("buyer.html")
+
+# Buyer
+@app.route("/buyer-orders")
+def buyer_orders():
+    return render_template("buyer-orders.html")
 
 # Seller
-@app.route("/seller")
-def seller():
-    return render_template('seller.html')
+@app.route("/seller-orders")
+def seller_orders():
+    return render_template("seller-orders.html")
 
 # Run server
 app.run()

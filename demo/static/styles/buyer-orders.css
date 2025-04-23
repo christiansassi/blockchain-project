@@ -30,41 +30,28 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 90px; /* Adjusted to include both logo and progress bar */
+    height: 90px;
     background-color: black;
     backdrop-filter: blur(10px);
     display: flex;
-    flex-direction: column; /* Stack logo and red bar vertically */
-    justify-content: flex-start; /* Align logo at the top */
-    padding: 20px 20px 0 20px; /* 20px padding from the top to logo */
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 20px 20px 0 20px;
     border-bottom: 1px solid black;
     z-index: 1000;
     box-sizing: border-box;
     user-select: none;
 }
 
-.right-icon img {
-    height: 48px;
-    cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-}
-
-.right-icon img:hover {
-    opacity: 1;
-}
-
-/* The logo remains with a 20px top padding from the page top */
 .logo img {
     height: 48px;
     width: auto;
     white-space: nowrap;
-    margin-bottom: 10px; /* Add space between logo and red bar */
+    margin-bottom: 10px;
 }
 
-
 .modal {
-    display: block; /* Ensures it takes full width/height */
+    display: none;
     position: fixed;
     z-index: 1001;
     left: 0;
@@ -73,7 +60,6 @@ body {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(10px);
-    display: flex;
     justify-content: center;
     align-items: center;
 }
@@ -90,7 +76,6 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
 }
-
 
 #popup-close {
     color: #aaa;
@@ -115,114 +100,107 @@ body.modal-open .modal-content {
     pointer-events: auto;
 }
 
-.product-grid {
+.order-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
     padding: 40px 80px 80px 80px;
     margin-top: 60px;
+    position: relative;
+    min-height: 80vh;
 }
 
-/* Card flip container */
-.product-card {
-    background: black;
+/* No orders container styling */
+.no-orders-container {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    text-align: center;
+    color: white;
+    grid-column: 1 / -1;
+    width: 100%;
+}
+
+.no-orders-emoticon {
+    font-size: 60px;
+    margin-bottom: 20px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.no-orders-text {
+    font-size: 28px;
+    color: #bbbbbb;
+    text-align: center;
+}
+
+.order-card {
+    background: #0d0d0d;
     border-radius: 24px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     color: white;
-    perspective: 1000px; /* 3D effect */
-    height: 400px; /* Increased fixed height for consistent flipping and to accommodate button */
-    cursor: pointer;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.product-card:hover {
+.order-card:hover {
     transform: scale(1.05);
     transition: transform 0.2s;
 }
 
-/* Card inner container for flip effect */
-.card-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-}
-
-.product-card.flipped .card-inner {
-    transform: rotateY(180deg);
-}
-
-/* Position the front and back sides */
-.card-front, .card-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    padding: 20px;
-    border-radius: 24px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    box-sizing: border-box;
-    background: #0d0d0d;
-}
-
-.card-back {
-    transform: rotateY(180deg);
-    background: #151515;
+/* Card section styling */
+.order-section {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 30px 20px;
+    height: 80px; /* Each section is exactly 1/3 of the card height */
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* Top section */
+.order-section.top {
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+
+/* Middle section */
+.order-section.middle {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+/* Bottom section */
+.order-section.bottom {
+    margin-top: 25px;
+    margin-bottom: 0px;
+    padding: 20px;
+}
+
+.order-title {
+    font-size: 24px;
+    margin: 0;
     text-align: center;
 }
 
-.card-back h3 {
-    margin-bottom: 20px;
-}
-
-.card-back-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    padding: 10px;
-    line-height: 1.6;
-}
-
-.product-image {
-    width: 150px;
-    height: 150px;
-    object-fit: contain;
-    border-radius: 10px;
-    margin: 0 auto 15px;
-}
-
-h3 {
-    font-size: 24px;
-    margin: 0px 0;
-}
-
-.stars {
-    font-size: 24px;
-    color: gold;
-    margin: 5px 0;
-}
-
-.price {
+.order-price {
     font-size: 18px;
     font-weight: bold;
-    margin: 0px 0 16px;
-    display: flex; /* Ensures full alignment */
-    justify-content: center; /* Center aligns within the flex container */
-    align-items: center; /* Aligns items properly */
+    margin: 0 0 8px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     gap: 5px;
 }
 
 .price-amount {
-    margin-right: 2.5px; /* Add some space between the price and the symbol */
+    margin-right: 2.5px;
 }
 
 .eth-symbol {
@@ -231,12 +209,27 @@ h3 {
 }
 
 .eth-logo {
-    width: 16px; /* Explicit width */
-    height: 16px; /* Explicit height */
-    display: inline-block; /* Ensures it behaves like an inline element */
+    width: 16px;
+    height: 16px;
+    display: inline-block;
 }
 
-button {
+.order-date {
+    font-size: 18px;
+    text-align: center;
+    margin: 0 0 8px 0;
+    color: #bbbbbb;
+}
+
+.order-status {
+    font-size: 18px;
+    text-align: center;
+    margin: 0;
+    font-weight: bold;
+    color: #22fe1a;
+}
+
+.refund-btn {
     background-color: white;
     color: black;
     border: none;
@@ -245,55 +238,43 @@ button {
     border-radius: 12px;
     cursor: pointer;
     width: 100%;
-    margin-top: 0px; /* Push to bottom of container */
+    margin: 0;
+    /* Remove any potential outline/border */
+    outline: none;
+    box-shadow: none;
+    /* Ensure proper appearance on all browsers */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
-button:hover {
+.refund-btn:hover:not(:disabled) {
     background-color: #22fe1a;
-    background-size: 150%;
 }
 
-button:active {
+.refund-btn:active:not(:disabled) {
     font-weight: 700;
 }
 
-/* Ensure the Buy button doesn't flip the card */
-.buy-btn {
-    position: relative;
-    z-index: 10;
+.refund-btn:disabled {
+    background-color: #555555;
+    color: #999999;
+    cursor: not-allowed;
+}
+
+/* Remove focus outline that might be causing the purple border */
+.refund-btn:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 #popup-message {
     margin: 0px;
 }
+
 #popup-message p {
     font-size: 18px;
     margin-bottom: 0px;
-}
-
-.price .hover-span {
-    display: inline;
-}
-
-.price .eth-symbol {
-    display: none;
-}
-
-.price .price-amount {
-    display: none;
-}
-
-
-.price:hover .hover-span {
-    display: none;
-}
-
-.price:hover .eth-symbol {
-    display: inline;
-}
-
-.price:hover .price-amount {
-    display: inline;
 }
 
 .loader-container {
