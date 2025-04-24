@@ -196,16 +196,18 @@ Private key: `0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
 > In order for the demo to function correctly, you must stick to these accounts.  
 > Wallet addresses and private keys are hardcoded into the demo for simplicity.
 
-### Best way to use the demo
+### How to use the demo
 
-- Open **two browser windows**:
-    - One with the **buyer** account selected in MetaMask.
-    - The other with the **seller** account selected.
-- Use the **owner’s terminal** to retrieve an order and set a new refund status if needed.  
-Provide the buyer address, seller address, and order ID.  
-If a refund request is pending, you’ll be prompted to update the order status:
-    - Enter `5` to **accept** the refund.
-    - Enter `6` to **decline** it.
+1. Open a browser window with MetaMask installed and connect to the local web server at `http://127.0.0.1:5000`.
+2. Click on `Run Demo`:
+    - If the buyer is selected on MetaMask, click on `Start Buying Safely`. From here, you can try purchasing products. To manage your orders, click on the top-right icon.
+    - If the seller is selected on MetaMask, click on `Boost Your Sales Now` to manage your orders.
+3. The owner's terminal will automatically retrieve orders with a pending refund. Once one is found, you can select it and change its status.
+
+> [!Warning]
+> If you restart the owner's terminal, you need to restart the entire demo (in case there is already a pending refund).  
+> This is because pending refunds are collected using a listener to the associated events.  
+> In the current demo, there is no implementation to restore past events (though it is possible, but this is for demonstration purposes only).
 
 ---
 

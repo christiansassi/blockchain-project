@@ -1,7 +1,7 @@
-const {RPC_URL, CONTRACT_NAME, ABI_FILE_IN, ABI_FILE_OUT} = require("./modules/params");
+const {HTTP_RPC_URL, CONTRACT_NAME, ABI_FILE_IN, ABI_FILE_OUT} = require("./modules/params");
 
 const Web3 = require("web3");
-const web3 = new Web3(RPC_URL);
+const web3 = new Web3(HTTP_RPC_URL);
 
 var ora = null;
 
@@ -19,7 +19,7 @@ async function waitForHardhatNode() {
 
             if(await web3.eth.getChainId())
             {
-                spinner.succeed(`Hardhat node started at ${RPC_URL}`);
+                spinner.succeed(`Hardhat node started at ${HTTP_RPC_URL}`);
             }
                 return;
         }
