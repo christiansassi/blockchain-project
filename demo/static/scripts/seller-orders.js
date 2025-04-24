@@ -46,6 +46,7 @@ function formatTimestamp(timestamp) {
 async function createOrders() {
     
     const grid = document.querySelector(".order-grid");
+    const fragment = document.createDocumentFragment();
 
     try {
 
@@ -54,6 +55,8 @@ async function createOrders() {
 
         const orders = await window.contract.methods.getSellerOrders(sender).call()
         
+        console.log(orders);
+
         // Check if there are no orders and display the message
         if (orders.length === 0) {
             const noOrdersElement = document.createElement("div");
@@ -116,9 +119,17 @@ async function createOrders() {
                 </div>
             `;
 
-            grid.appendChild(card);
+            fragment.appendChild(card);
+        }
 
-            console.log(order);
+        const tempDiv = document.createElement('div');
+        tempDiv.appendChild(fragment.cloneNode(true));
+
+        const fragmentHTML = tempDiv.innerHTML;
+
+        if (grid.innerHTML !== fragmentHTML) {
+            grid.innerHTML = "";
+            grid.appendChild(fragment);
         }
 
     } catch (error) {
@@ -191,6 +202,10 @@ async function init() {
     setupModalPopup();
 
     unblockPage();
+
+    setInterval(async () => {
+        await createOrders();
+    }, 5000);
 }
 
 // Set up page after DOM is fully loaded
