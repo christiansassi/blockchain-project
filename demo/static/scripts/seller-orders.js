@@ -53,12 +53,12 @@ async function createOrders() {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         const sender = accounts[0];
 
-        const orders = await window.contract.methods.getSellerOrders(sender).call()
-        
-        console.log(orders);
+        const orderNum = await window.contract.methods.getSellerOrdersLength().call({ from: sender })
+
+        console.log(orderNum);
 
         // Check if there are no orders and display the message
-        if (orders.length === 0) {
+        if (orderNum === 0) {
             const noOrdersElement = document.createElement("div");
             noOrdersElement.classList.add("no-orders-container");
             noOrdersElement.innerHTML = `
@@ -74,8 +74,8 @@ async function createOrders() {
 
         const now = Math.floor(Date.now() / 1000);
 
-        for(let i=0; i<orders.length; i++) {
-            const order = orders[i];
+        for(let i=0; i<orderNum; i++) {
+            const order = await window.contract.methods.getSellerOrder(i).call({ from: sender });
             
             const buyer = order.buyer;
             const seller = order.seller;
