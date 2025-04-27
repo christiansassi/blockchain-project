@@ -295,7 +295,7 @@ describe("Pause / Unpause", function () {
         await expect(userContract.pauseNewOrders()).to.be.revertedWithCustomError(userContract, "OwnableUnauthorizedAccount").withArgs(user.address);
     });
 
-    it("Should allow the owner to unpause the creation of new orders", async function () {
+    it("Should not allow the user to unpause the creation of new orders", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
 
