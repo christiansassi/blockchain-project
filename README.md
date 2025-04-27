@@ -237,6 +237,18 @@ While fixable, this issue is beyond the scope of this project, which is tailored
     </p>
 </div>
 
+<div align="center">
+    <p>
+        <img width="100%" src="assets/demo/demo2.gif"/>
+    </p>
+</div>
+
+<div align="center">
+    <p>
+        <img width="100%" src="assets/demo/demo3.gif"/>
+    </p>
+</div>
+
 # Real World Applications
 
 This project originated as a university assignment, and the behavior demonstrated in the demo differs significantly from what would occur in a real-world scenario.
