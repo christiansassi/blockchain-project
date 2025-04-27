@@ -205,8 +205,7 @@ Private key: `0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
 3. The owner's terminal will automatically retrieve orders with a pending refund. Once one is found, you can select it and change its status.
 
 > [!Warning]
-> If you restart the owner's terminal, you need to restart the entire demo (in case there is already a pending refund).  
-> This is because pending refunds are collected using a listener to the associated events.  
+> If you restart the owner's terminal, you need to restart the entire demo.
 > In the current demo, there is no implementation to restore past events (though it is possible, but this is for demonstration purposes only).
 
 ---
