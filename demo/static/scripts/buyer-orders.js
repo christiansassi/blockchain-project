@@ -58,7 +58,7 @@ async function createOrders() {
         console.log(orderNum);
 
         // Check if there are no orders and display the message
-        if (orderNum === 0) {
+        if (orderNum == 0) {
             const noOrdersElement = document.createElement("div");
             noOrdersElement.classList.add("no-orders-container");
             noOrdersElement.innerHTML = `

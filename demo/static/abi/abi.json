@@ -34,6 +34,32 @@
                 {
                     "indexed": true,
                     "internalType": "address",
+                    "name": "owner",
+                    "type": "address"
+                }
+            ],
+            "name": "NewOrdersPaused",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "owner",
+                    "type": "address"
+                }
+            ],
+            "name": "NewOrdersUnpaused",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
                     "name": "buyer",
                     "type": "address"
                 },
@@ -291,12 +317,12 @@
         {
             "inputs": [
                 {
-                    "internalType": "address",
-                    "name": "buyer",
-                    "type": "address"
+                    "internalType": "uint256",
+                    "name": "index",
+                    "type": "uint256"
                 }
             ],
-            "name": "getBuyerOrders",
+            "name": "getBuyerOrder",
             "outputs": [
                 {
                     "components": [
@@ -331,9 +357,22 @@
                             "type": "uint8"
                         }
                     ],
-                    "internalType": "struct Order[]",
+                    "internalType": "struct Order",
                     "name": "",
-                    "type": "tuple[]"
+                    "type": "tuple"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "getBuyerOrdersLength",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
                 }
             ],
             "stateMutability": "view",
@@ -442,12 +481,12 @@
         {
             "inputs": [
                 {
-                    "internalType": "address",
-                    "name": "seller",
-                    "type": "address"
+                    "internalType": "uint256",
+                    "name": "index",
+                    "type": "uint256"
                 }
             ],
-            "name": "getSellerOrders",
+            "name": "getSellerOrder",
             "outputs": [
                 {
                     "components": [
@@ -482,9 +521,22 @@
                             "type": "uint8"
                         }
                     ],
-                    "internalType": "struct Order[]",
+                    "internalType": "struct Order",
                     "name": "",
-                    "type": "tuple[]"
+                    "type": "tuple"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "getSellerOrdersLength",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
                 }
             ],
             "stateMutability": "view",
@@ -519,6 +571,13 @@
         {
             "inputs": [],
             "name": "pause",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "pauseNewOrders",
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function"
@@ -715,6 +774,13 @@
         {
             "inputs": [],
             "name": "unpause",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "unpauseNewOrders",
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function"
