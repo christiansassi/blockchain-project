@@ -22,17 +22,15 @@ const REFUND_WITHDRAWN = "RefundWithdrawn";
 const PAUSED = "Paused";
 const UNPAUSED = "Unpaused";
 
-const DAYS_1 = 24 * 60 * 60;
-const getCurrentTimestamp = () => Math.floor(Date.now() / 1000);
-
 async function deployContractFixture() {
-    // Get the ContractFactory
+        
+    // Get the ContractFactory for the contract
     const Contract = await ethers.getContractFactory(CONTRACT_NAME);
 
     // Deploy the contract
     const contract = await Contract.deploy();
 
-    // Wait for deployment to complete
+    // Wait until the contract is deployed
     await contract.waitForDeployment();
 
     return { contract };
@@ -75,7 +73,7 @@ describe("Ownership", function () {
         const newOwner = accounts[1];
 
         // Update owner
-        await expect(ownerContract.updateOwner(newOwner)).to.not.be.reverted;
+        expect(await ownerContract.updateOwner(newOwner)).to.not.be.reverted;
 
         // getOwner() should match accounts[1]
         expect(await contract.getOwner()).to.equal(newOwner);
@@ -164,7 +162,7 @@ describe("Pause / Unpause", function () {
         const ownerContract = contract.connect(owner);
 
         // Pause
-        expect(await ownerContract.pause()).to.emit(ownerContract, PAUSED).withArgs(owner);
+        await expect(ownerContract.pause()).to.emit(ownerContract, PAUSED).withArgs(owner);
     });
 
     it("Should allow the owner to unpause the contract", async function () {
@@ -178,10 +176,10 @@ describe("Pause / Unpause", function () {
         const ownerContract = contract.connect(owner);
 
         // Pause
-        expect(await ownerContract.pause()).to.emit(ownerContract, PAUSED).withArgs(owner);
+        await expect(ownerContract.pause()).to.emit(ownerContract, PAUSED).withArgs(owner);
 
         // Unpause
-        expect(await ownerContract.unpause()).to.emit(ownerContract, UNPAUSED).withArgs(owner);
+        await expect(ownerContract.unpause()).to.emit(ownerContract, UNPAUSED).withArgs(owner);
     });
 
     it("Should not allow the owner to pause the contract already paused", async function () {
@@ -195,7 +193,7 @@ describe("Pause / Unpause", function () {
         const ownerContract = contract.connect(owner);
 
         // Pause
-        expect(await ownerContract.pause()).to.emit(ownerContract, PAUSED).withArgs(owner);
+        await expect(ownerContract.pause()).to.emit(ownerContract, PAUSED).withArgs(owner);
 
         // Pause
         await expect(ownerContract.pause()).to.be.revertedWith("Pausable: paused");
@@ -243,7 +241,7 @@ describe("Pause / Unpause", function () {
         const userContract = contract.connect(user);
 
         // Pause
-        expect(await ownerContract.pause()).to.emit(ownerContract, PAUSED).withArgs(owner);
+        await expect(ownerContract.pause()).to.emit(ownerContract, PAUSED).withArgs(owner);
 
         // Unpause
         await expect(userContract.unpause()).to.be.revertedWithCustomError(userContract, "OwnableUnauthorizedAccount").withArgs(user.address);
@@ -264,7 +262,7 @@ describe("Buy", function () {
         const seller = accounts[2];
         
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
     });
 
     it("Should not allow a user to buy with an incorrect payment amount", async function () {
@@ -347,10 +345,10 @@ describe("Sell", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
     });
 
     it("Should not allow a user to sell from an invalid buyer address", async function () {
@@ -367,10 +365,10 @@ describe("Sell", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        await expect(sellerContract.sell(ZERO_ADDRESS, 1, ETH)).to.be.revertedWith("Invalid buyer address");
+        await expect(sellerContract.sell(ZERO_ADDRESS, 0, ETH)).to.be.revertedWith("Invalid buyer address");
     });
 
     it("Should not allow a user to sell from themselves", async function () {
@@ -387,10 +385,10 @@ describe("Sell", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        await expect(sellerContract.sell(seller, 1, ETH)).to.be.revertedWith("Buyer and seller match");
+        await expect(sellerContract.sell(seller, 0, ETH)).to.be.revertedWith("Buyer and seller match");
     });
 
     it("Should not allow a user to sell with an invald order ID", async function () {
@@ -407,30 +405,10 @@ describe("Sell", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
         await expect(sellerContract.sell(buyer, 2, ETH)).to.be.revertedWith("Invalid order ID");
-    });
-
-    it("Should not allow a user to sell an order that does not exist", async function () {
-        // Deploy a clean contract instance
-        const { contract } = await loadFixture(deployContractFixture);
-        
-        // Get available accounts
-        const accounts = await ethers.getSigners();
-
-        const buyer = accounts[1];
-        const buyerContract = contract.connect(buyer);
-
-        const seller = accounts[2];
-        const sellerContract = contract.connect(seller);
-
-        // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
-
-        // Sell
-        await expect(sellerContract.sell(buyer, 0, ETH)).to.be.revertedWith("Order does not exist");
     });
 
     it("Should not allow a user to sell the same order more than once", async function () {
@@ -447,13 +425,43 @@ describe("Sell", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Sell
-        await expect(sellerContract.sell(buyer, 1, ETH)).to.be.revertedWith("Order already accepted");
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.be.revertedWith("Order already accepted");
+    });
+
+    it("Should not allow a user to sell an order already completed", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+        
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const buyer = accounts[1];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[2];
+        const sellerContract = contract.connect(seller);
+
+        // Buy
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
+
+        // Sell
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
+
+        // Forward time
+        await network.provider.send("evm_increaseTime", [WARRANTY]);
+        await network.provider.send("evm_mine");
+
+        // Withdraw order
+        await expect(sellerContract.withdrawOrder(buyer, 0)).to.emit(sellerContract, ORDER_WITHDRAWN).withArgs(buyer, seller, 0);
+
+        // Sell
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.be.revertedWith("Order already completed");
     });
 
     it("Should not allow a user to sell an order with a pending refund", async function () {
@@ -470,16 +478,16 @@ describe("Sell", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Sell
-        await expect(sellerContract.sell(buyer, 1, ETH)).to.be.revertedWith("A refund has been requested for this order");
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.be.revertedWith("A refund has been requested for this order");
     });
 
     it("Should not allow a user to sell an order with an accepted refund", async function () {
@@ -499,19 +507,19 @@ describe("Sell", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Accept refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 5);
 
         // Sell
-        await expect(sellerContract.sell(buyer, 1, ETH)).to.be.revertedWith("A refund has been accepted for this order");
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.be.revertedWith("A refund has been accepted for this order");
     });
 
     it("Should not allow a user to sell an order with a declined refund", async function () {
@@ -531,19 +539,19 @@ describe("Sell", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Accept refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 6)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 6)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 6);
 
         // Sell
-        await expect(sellerContract.sell(buyer, 1, ETH)).to.be.revertedWith("A refund has been declined for this order");
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.be.revertedWith("A refund has been declined for this order");
     });
 
     it("Should not allow a user to sell an order with a wrong price", async function () {
@@ -560,10 +568,10 @@ describe("Sell", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        await expect(sellerContract.sell(buyer, 1, ETH + ETH)).to.be.revertedWith("Price mismatch");
+        await expect(sellerContract.sell(buyer, 0, ETH + ETH)).to.be.revertedWith("Price mismatch");
     });
 
     it("Should not allow a user to sell an order after the max allowed sell delay", async function () {
@@ -580,14 +588,14 @@ describe("Sell", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Forward time
         await network.provider.send("evm_increaseTime", [MAX_SELL_DELAY]);
         await network.provider.send("evm_mine");
 
         // Sell
-        await expect(sellerContract.sell(buyer, 1, ETH)).to.be.revertedWith("Order took too long to be accepted");
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.be.revertedWith("Order took too long to be accepted");
     });
 });
 
@@ -606,17 +614,17 @@ describe("Withdraw Order", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Forward time
         await network.provider.send("evm_increaseTime", [WARRANTY]);
         await network.provider.send("evm_mine");
 
         // Withdraw order
-        expect(await sellerContract.withdrawOrder(buyer, 1)).to.emit(sellerContract, ORDER_WITHDRAWN).withArgs(buyer, seller, 1);
+        await expect(sellerContract.withdrawOrder(buyer, 0)).to.emit(sellerContract, ORDER_WITHDRAWN).withArgs(buyer, seller, 0);
     });
 
     it("Should not allow a user to withdraw an order with an invalid buyer address", async function () {
@@ -633,17 +641,17 @@ describe("Withdraw Order", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Forward time
         await network.provider.send("evm_increaseTime", [WARRANTY]);
         await network.provider.send("evm_mine");
 
         // Withdraw order
-        await expect(sellerContract.withdrawOrder(ZERO_ADDRESS, 1)).to.be.revertedWith("Invalid buyer address");
+        await expect(sellerContract.withdrawOrder(ZERO_ADDRESS, 0)).to.be.revertedWith("Invalid buyer address");
     });
 
     it("Should not allow a user to withdraw an order from themselves", async function () {
@@ -660,17 +668,17 @@ describe("Withdraw Order", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Forward time
         await network.provider.send("evm_increaseTime", [WARRANTY]);
         await network.provider.send("evm_mine");
 
         // Withdraw order
-        await expect(sellerContract.withdrawOrder(seller, 1)).to.be.revertedWith("Buyer and seller match");
+        await expect(sellerContract.withdrawOrder(seller, 0)).to.be.revertedWith("Buyer and seller match");
     });
 
     it("Should not allow a user to withdraw an order with an invalid order ID", async function () {
@@ -687,10 +695,10 @@ describe("Withdraw Order", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Forward time
         await network.provider.send("evm_increaseTime", [WARRANTY]);
@@ -698,33 +706,6 @@ describe("Withdraw Order", function () {
 
         // Withdraw order
         await expect(sellerContract.withdrawOrder(buyer, 2)).to.be.revertedWith("Invalid order ID");
-    });
-
-    it("Should not allow a user to withdraw an order that does not exist", async function () {
-        // Deploy a clean contract instance
-        const { contract } = await loadFixture(deployContractFixture);
-        
-        // Get available accounts
-        const accounts = await ethers.getSigners();
-
-        const buyer = accounts[1];
-        const buyerContract = contract.connect(buyer);
-
-        const seller = accounts[2];
-        const sellerContract = contract.connect(seller);
-
-        // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
-
-        // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
-
-        // Forward time
-        await network.provider.send("evm_increaseTime", [WARRANTY]);
-        await network.provider.send("evm_mine");
-
-        // Withdraw order
-        await expect(sellerContract.withdrawOrder(buyer, 0)).to.be.revertedWith("Order does not exist");
     });
 
     it("Should not allow a user to withdraw an order before the warranty period ends", async function () {
@@ -741,17 +722,17 @@ describe("Withdraw Order", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
         
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Forward time
         await network.provider.send("evm_increaseTime", [Math.floor(WARRANTY / 2)]);
         await network.provider.send("evm_mine");
 
         // Withdraw order
-        await expect(sellerContract.withdrawOrder(buyer, 1)).to.be.revertedWith("You cannot withdrawn your funds yet");
+        await expect(sellerContract.withdrawOrder(buyer, 0)).to.be.revertedWith("You cannot withdrawn your funds yet");
     });
 
     it("Should not allow a user to withdraw an order that has not been accepted", async function () {
@@ -768,10 +749,40 @@ describe("Withdraw Order", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
         
         // Withdraw order
-        await expect(sellerContract.withdrawOrder(buyer, 1)).to.be.revertedWith("Order has to be accepted first");
+        await expect(sellerContract.withdrawOrder(buyer, 0)).to.be.revertedWith("Order has to be accepted first");
+    });
+
+    it("Should not allow a user to withdraw an order already completed", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+        
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const buyer = accounts[1];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[2];
+        const sellerContract = contract.connect(seller);
+        
+        // Buy
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
+
+        // Sell
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
+
+        // Forward time
+        await network.provider.send("evm_increaseTime", [WARRANTY]);
+        await network.provider.send("evm_mine");
+
+        // Withdraw order
+        await expect(sellerContract.withdrawOrder(buyer, 0)).to.emit(sellerContract, ORDER_WITHDRAWN).withArgs(buyer, seller, 0);
+
+        // Withdraw order
+        await expect(sellerContract.withdrawOrder(buyer, 0)).to.be.revertedWith("Order already completed");
     });
 
     it("Should not allow a user to withdraw an order with a pending refund", async function () {
@@ -788,20 +799,20 @@ describe("Withdraw Order", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
         
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
         
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Forward time
         await network.provider.send("evm_increaseTime", [WARRANTY]);
         await network.provider.send("evm_mine");
 
         // Withdraw order
-        await expect(sellerContract.withdrawOrder(buyer, 1)).to.be.revertedWith("A refund has been requested for this order");
+        await expect(sellerContract.withdrawOrder(buyer, 0)).to.be.revertedWith("A refund has been requested for this order");
     });
 
     it("Should not allow a user to withdraw an order with an accepted refund", async function () {
@@ -821,23 +832,23 @@ describe("Withdraw Order", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
         
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
         
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 5);
 
         // Forward time
         await network.provider.send("evm_increaseTime", [WARRANTY]);
         await network.provider.send("evm_mine");
 
         // Withdraw order
-        await expect(sellerContract.withdrawOrder(buyer, 1)).to.be.revertedWith("A refund has been accepted for this order");
+        await expect(sellerContract.withdrawOrder(buyer, 0)).to.be.revertedWith("A refund has been accepted for this order");
     });
 });
 
@@ -856,13 +867,13 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
     });
 
     it("Should not allow a user to request a refund with an invalid seller address", async function () {
@@ -879,13 +890,13 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        await expect(buyerContract.requestRefund(ZERO_ADDRESS, 1)).to.be.revertedWith("Invalid seller address");
+        await expect(buyerContract.requestRefund(ZERO_ADDRESS, 0)).to.be.revertedWith("Invalid seller address");
     });
 
     it("Should not allow a user to request a refund from themselves", async function () {
@@ -902,13 +913,13 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        await expect(buyerContract.requestRefund(buyer, 1)).to.be.revertedWith("Buyer and seller match");
+        await expect(buyerContract.requestRefund(buyer, 0)).to.be.revertedWith("Buyer and seller match");
     });
 
     it("Should not allow a user to request a refund with an invalid order ID", async function () {
@@ -925,10 +936,10 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
         await expect(buyerContract.requestRefund(seller, 2)).to.be.revertedWith("Invalid order ID");
@@ -947,10 +958,10 @@ describe("Refund", function () {
         const seller = accounts[2];
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Request refund
-        await expect(buyerContract.requestRefund(seller, 1)).to.be.revertedWith("Order has to be accepted first");
+        await expect(buyerContract.requestRefund(seller, 0)).to.be.revertedWith("Order has to be accepted first");
     });
 
     it("Should allow a user to request and obtain a refund for an order after the max allowed sell delay", async function () {
@@ -966,14 +977,44 @@ describe("Refund", function () {
         const seller = accounts[2];
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Forward time
         await network.provider.send("evm_increaseTime", [MAX_SELL_DELAY]);
         await network.provider.send("evm_mine");
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_WITHDRAWN).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_WITHDRAWN).withArgs(buyer, seller, 0);
+    });
+
+    it("Should not allow a user to request a refund for an order already completed", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+        
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const buyer = accounts[1];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[2];
+        const sellerContract = contract.connect(seller);
+
+        // Buy
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
+
+        // Sell
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
+
+        // Forward time
+        await network.provider.send("evm_increaseTime", [WARRANTY]);
+        await network.provider.send("evm_mine");
+
+        // Withdraw order
+        await expect(sellerContract.withdrawOrder(buyer, 0)).to.emit(sellerContract, ORDER_WITHDRAWN).withArgs(buyer, seller, 0);
+
+        // Request refund
+        await expect(buyerContract.requestRefund(seller, 0)).to.be.revertedWith("Order already completed");
     });
 
     it("Should not allow a user to request a refund for an order with a pending refund", async function () {
@@ -990,16 +1031,16 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        await expect(buyerContract.requestRefund(seller, 1)).to.be.revertedWith("A refund has already been requested for this order");
+        await expect(buyerContract.requestRefund(seller, 0)).to.be.revertedWith("A refund has already been requested for this order");
     });
 
     it("Should not allow a user to request a refund for an order with an accepted refund", async function () {
@@ -1019,19 +1060,19 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 5);
 
         // Request refund
-        await expect(buyerContract.requestRefund(seller, 1)).to.be.revertedWith("A refund has already been accepted for this order");
+        await expect(buyerContract.requestRefund(seller, 0)).to.be.revertedWith("A refund has already been accepted for this order");
     });
 
     it("Should not allow a user to request a refund for an order with a declined refund", async function () {
@@ -1051,19 +1092,19 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 6)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 6)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 6);
 
         // Request refund
-        await expect(buyerContract.requestRefund(seller, 1)).to.be.revertedWith("A refund has already been declined for this order");
+        await expect(buyerContract.requestRefund(seller, 0)).to.be.revertedWith("A refund has already been declined for this order");
     });
 
     it("Should not allow a user to request a refund after the warranty period", async function () {
@@ -1080,17 +1121,17 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Forward time
         await network.provider.send("evm_increaseTime", [WARRANTY]);
         await network.provider.send("evm_mine");
 
         // Request refund
-        await expect(buyerContract.requestRefund(seller, 1)).to.be.revertedWith("Refund window closed");
+        await expect(buyerContract.requestRefund(seller, 0)).to.be.revertedWith("Refund window closed");
     });
 
     it("Should allow a user to revoke a refund", async function () {
@@ -1107,16 +1148,16 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Revoke refund
-        await expect(buyerContract.revokeRefund(seller, 1)).to.emit(buyerContract, REFUND_REVOKED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.revokeRefund(seller, 0)).to.emit(buyerContract, REFUND_REVOKED).withArgs(buyer, seller, 0);
     });
 
     it("Should not allow a user to revoke a refund that does not exist", async function () {
@@ -1132,10 +1173,10 @@ describe("Refund", function () {
         const seller = accounts[2];
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Revoke refund
-        await expect(buyerContract.revokeRefund(seller, 1)).to.be.revertedWith("No refund has been requested for this order");
+        await expect(buyerContract.revokeRefund(seller, 0)).to.be.revertedWith("No refund has been requested for this order");
     });
 
     it("Should not allow a user to revoke a refund that does not exist", async function () {
@@ -1152,13 +1193,43 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Revoke refund
-        await expect(buyerContract.revokeRefund(seller, 1)).to.be.revertedWith("No refund has been requested for this order");
+        await expect(buyerContract.revokeRefund(seller, 0)).to.be.revertedWith("No refund has been requested for this order");
+    });
+
+    it("Should not allow a user to revoke a refund that does not exist", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+        
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const buyer = accounts[1];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[2];
+        const sellerContract = contract.connect(seller);
+
+        // Buy
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
+
+        // Sell
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
+
+        // Forward time
+        await network.provider.send("evm_increaseTime", [WARRANTY]);
+        await network.provider.send("evm_mine");
+
+        // Withdraw order
+        await expect(sellerContract.withdrawOrder(buyer, 0)).to.emit(sellerContract, ORDER_WITHDRAWN).withArgs(buyer, seller, 0);
+
+        // Revoke refund
+        await expect(buyerContract.revokeRefund(seller, 0)).to.be.revertedWith("No refund has been requested for this order");
     });
 
     it("Should not allow a user to revoke a refund that has already been accepted", async function () {
@@ -1178,19 +1249,19 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 5);
 
         // Revoke refund
-        await expect(buyerContract.revokeRefund(seller, 1)).to.be.revertedWith("A refund has already been accepted for this order");
+        await expect(buyerContract.revokeRefund(seller, 0)).to.be.revertedWith("A refund has already been accepted for this order");
     });
 
     it("Should not allow a user to revoke a refund that has already been declined", async function () {
@@ -1210,19 +1281,19 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 6)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 6)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 6);
 
         // Revoke refund
-        await expect(buyerContract.revokeRefund(seller, 1)).to.be.revertedWith("A refund has already been declined for this order");
+        await expect(buyerContract.revokeRefund(seller, 0)).to.be.revertedWith("A refund has already been declined for this order");
     });
 
     it("Should allow the owner to resolve a refund", async function () {
@@ -1242,16 +1313,16 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 6)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 6)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 6);
     });
 
     it("Should allow the owner to resolve a refund", async function () {
@@ -1271,16 +1342,16 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 5);
     });
 
     it("Should not allow a user to resolve a refund", async function () {
@@ -1303,17 +1374,17 @@ describe("Refund", function () {
         const userContract = contract.connect(user);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        await expect(userContract.resolveRefund(buyer, seller, 1, 5)).to.be.revertedWithCustomError(userContract, "OwnableUnauthorizedAccount").withArgs(user.address);
-        await expect(userContract.resolveRefund(buyer, seller, 1, 5)).to.be.revertedWithCustomError(userContract, "OwnableUnauthorizedAccount").withArgs(user.address);
+        await expect(userContract.resolveRefund(buyer, seller, 0, 5)).to.be.revertedWithCustomError(userContract, "OwnableUnauthorizedAccount").withArgs(user.address);
+        await expect(userContract.resolveRefund(buyer, seller, 0, 5)).to.be.revertedWithCustomError(userContract, "OwnableUnauthorizedAccount").withArgs(user.address);
     });
 
     it("Should not allow the owner to resolve a refund with an invalid new refund status", async function () {
@@ -1333,20 +1404,20 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        await expect(ownerContract.resolveRefund(buyer, seller, 1, 0)).to.be.revertedWith("Invalid new refund status");
-        await expect(ownerContract.resolveRefund(buyer, seller, 1, 1)).to.be.revertedWith("Invalid new refund status");
-        await expect(ownerContract.resolveRefund(buyer, seller, 1, 2)).to.be.revertedWith("Invalid new refund status");
-        await expect(ownerContract.resolveRefund(buyer, seller, 1, 3)).to.be.revertedWith("Invalid new refund status");
-        await expect(ownerContract.resolveRefund(buyer, seller, 1, 4)).to.be.revertedWith("Invalid new refund status");
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 0)).to.be.revertedWith("Invalid new refund status");
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 1)).to.be.revertedWith("Invalid new refund status");
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 2)).to.be.revertedWith("Invalid new refund status");
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 3)).to.be.revertedWith("Invalid new refund status");
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 4)).to.be.revertedWith("Invalid new refund status");
     });
 
     it("Should not allow the owner to resolve a refund with an invalid buyer address", async function () {
@@ -1366,17 +1437,17 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        await expect(ownerContract.resolveRefund(ZERO_ADDRESS, seller, 1, 5)).to.be.revertedWith("Invalid buyer address");
-        await expect(ownerContract.resolveRefund(ZERO_ADDRESS, seller, 1, 6)).to.be.revertedWith("Invalid buyer address");
+        await expect(ownerContract.resolveRefund(ZERO_ADDRESS, seller, 0, 5)).to.be.revertedWith("Invalid buyer address");
+        await expect(ownerContract.resolveRefund(ZERO_ADDRESS, seller, 0, 6)).to.be.revertedWith("Invalid buyer address");
     });
 
     it("Should not allow the owner to resolve a refund with an invalid seller address", async function () {
@@ -1396,17 +1467,17 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        await expect(ownerContract.resolveRefund(buyer, ZERO_ADDRESS, 1, 5)).to.be.revertedWith("Invalid seller address");
-        await expect(ownerContract.resolveRefund(buyer, ZERO_ADDRESS, 1, 6)).to.be.revertedWith("Invalid seller address");
+        await expect(ownerContract.resolveRefund(buyer, ZERO_ADDRESS, 0, 5)).to.be.revertedWith("Invalid seller address");
+        await expect(ownerContract.resolveRefund(buyer, ZERO_ADDRESS, 0, 6)).to.be.revertedWith("Invalid seller address");
     });
 
     it("Should not allow the owner to resolve a refund with the same buyer and seller addresses", async function () {
@@ -1426,19 +1497,19 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        await expect(ownerContract.resolveRefund(buyer, buyer, 1, 5)).to.be.revertedWith("Buyer and seller match");
-        await expect(ownerContract.resolveRefund(buyer, buyer, 1, 6)).to.be.revertedWith("Buyer and seller match");
-        await expect(ownerContract.resolveRefund(seller, seller, 1, 5)).to.be.revertedWith("Buyer and seller match");
-        await expect(ownerContract.resolveRefund(seller, seller, 1, 6)).to.be.revertedWith("Buyer and seller match");
+        await expect(ownerContract.resolveRefund(buyer, buyer, 0, 5)).to.be.revertedWith("Buyer and seller match");
+        await expect(ownerContract.resolveRefund(buyer, buyer, 0, 6)).to.be.revertedWith("Buyer and seller match");
+        await expect(ownerContract.resolveRefund(seller, seller, 0, 5)).to.be.revertedWith("Buyer and seller match");
+        await expect(ownerContract.resolveRefund(seller, seller, 0, 6)).to.be.revertedWith("Buyer and seller match");
     });
 
     it("Should not allow the owner to resolve a refund with an invalid order ID", async function () {
@@ -1458,47 +1529,17 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
         await expect(ownerContract.resolveRefund(buyer, seller, 2, 5)).to.be.revertedWith("Invalid order ID");
         await expect(ownerContract.resolveRefund(buyer, seller, 2, 6)).to.be.revertedWith("Invalid order ID");
-    });
-
-    it("Should not allow the owner to resolve a refund for an order that does not exist", async function () {
-        // Deploy a clean contract instance
-        const { contract } = await loadFixture(deployContractFixture);
-        
-        // Get available accounts
-        const accounts = await ethers.getSigners();
-
-        const owner = accounts[0];
-        const ownerContract = contract.connect(owner);
-
-        const buyer = accounts[1];
-        const buyerContract = contract.connect(buyer);
-
-        const seller = accounts[2];
-        const sellerContract = contract.connect(seller);
-
-        // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
-
-        // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
-
-        // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
-
-        // Resolve refund
-        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.be.revertedWith("Order does not exist");
-        await expect(ownerContract.resolveRefund(buyer, seller, 0, 6)).to.be.revertedWith("Order does not exist");
     });
 
     it("Should not allow the owner to resolve a refund that does not exist", async function () {
@@ -1517,11 +1558,72 @@ describe("Refund", function () {
         const seller = accounts[2];
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        await expect(ownerContract.resolveRefund(buyer, seller, 1, 5)).to.be.revertedWith("No refund has been requested for this order");
-        await expect(ownerContract.resolveRefund(buyer, seller, 1, 6)).to.be.revertedWith("No refund has been requested for this order");
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.be.revertedWith("No refund has been requested for this order");
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 6)).to.be.revertedWith("No refund has been requested for this order");
+    });
+
+    it("Should not allow the owner to resolve a refund that does not exist", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+        
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const owner = accounts[0];
+        const ownerContract = contract.connect(owner);
+
+        const buyer = accounts[1];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[2];
+        const sellerContract = contract.connect(seller);
+
+        // Buy
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
+        
+        // Sell
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
+
+        // Resolve refund
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.be.revertedWith("No refund has been requested for this order");
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 6)).to.be.revertedWith("No refund has been requested for this order");
+    });
+
+    it("Should not allow the owner to resolve a refund for an order that has already been completed", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+        
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const owner = accounts[0];
+        const ownerContract = contract.connect(owner);
+
+        const buyer = accounts[1];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[2];
+        const sellerContract = contract.connect(seller);
+
+        // Buy
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
+        
+        // Sell
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
+
+        // Forward time
+        await network.provider.send("evm_increaseTime", [WARRANTY]);
+        await network.provider.send("evm_mine");
+
+        // Withdraw order
+        await expect(sellerContract.withdrawOrder(buyer, 0)).to.emit(sellerContract, ORDER_WITHDRAWN).withArgs(buyer, seller, 0);
+
+        // Resolve refund
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.be.revertedWith("Order already completed");
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 6)).to.be.revertedWith("Order already completed");
     });
 
     it("Should not allow the owner to resolve a refund that has already been accepted", async function () {
@@ -1541,20 +1643,20 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 5);
 
         // Resolve refund
-        await expect(ownerContract.resolveRefund(buyer, seller, 1, 5)).to.be.revertedWith("A refund has already been accepted for this order");
-        await expect(ownerContract.resolveRefund(buyer, seller, 1, 6)).to.be.revertedWith("A refund has already been accepted for this order");
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.be.revertedWith("A refund has already been accepted for this order");
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 6)).to.be.revertedWith("A refund has already been accepted for this order");
     });
 
     it("Should not allow the owner to resolve a refund that has already been declined", async function () {
@@ -1574,20 +1676,20 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 6)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 6)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 6);
 
         // Resolve refund
-        await expect(ownerContract.resolveRefund(buyer, seller, 1, 5)).to.be.revertedWith("A refund has already been declined for this order");
-        await expect(ownerContract.resolveRefund(buyer, seller, 1, 6)).to.be.revertedWith("A refund has already been declined for this order");
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.be.revertedWith("A refund has already been declined for this order");
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 6)).to.be.revertedWith("A refund has already been declined for this order");
     });
 
     it("Should allow a user to withdraw a refund", async function () {
@@ -1607,19 +1709,19 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 5);
 
         // Withdraw refund
-        expect(await buyerContract.withdrawRefund(seller, 1)).to.emit(buyerContract, REFUND_WITHDRAWN).withArgs(buyer, seller, 1);
+        await expect(buyerContract.withdrawRefund(seller, 0)).to.emit(buyerContract, REFUND_WITHDRAWN).withArgs(buyer, seller, 0);
     });
 
     it("Should not allow a user to withdraw a refund with an invalid seller address", async function () {
@@ -1639,19 +1741,19 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 5);
 
         // Withdraw refund
-        await expect(buyerContract.withdrawRefund(ZERO_ADDRESS, 1)).to.be.revertedWith("Invalid seller address");
+        await expect(buyerContract.withdrawRefund(ZERO_ADDRESS, 0)).to.be.revertedWith("Invalid seller address");
     });
 
     it("Should not allow a user to withdraw a refund with the same buyer and seller addresses", async function () {
@@ -1671,19 +1773,19 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 5);
 
         // Withdraw refund
-        await expect(buyerContract.withdrawRefund(buyer, 1)).to.be.revertedWith("Buyer and seller match");
+        await expect(buyerContract.withdrawRefund(buyer, 0)).to.be.revertedWith("Buyer and seller match");
     });
 
     it("Should not allow a user to withdraw a refund with an invalid order ID", async function () {
@@ -1703,51 +1805,19 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 5);
 
         // Withdraw refund
         await expect(buyerContract.withdrawRefund(seller, 2)).to.be.revertedWith("Invalid order ID");
-    });
-    
-    it("Should not allow a user to withdraw a refund for an order that does not exist", async function () {
-        // Deploy a clean contract instance
-        const { contract } = await loadFixture(deployContractFixture);
-        
-        // Get available accounts
-        const accounts = await ethers.getSigners();
-
-        const owner = accounts[0];
-        const ownerContract = contract.connect(owner);
-
-        const buyer = accounts[1];
-        const buyerContract = contract.connect(buyer);
-
-        const seller = accounts[2];
-        const sellerContract = contract.connect(seller);
-
-        // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
-
-        // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
-
-        // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
-
-        // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
-
-        // Withdraw refund
-        await expect(buyerContract.withdrawRefund(seller, 0)).to.be.revertedWith("Order does not exist");
     });
 
     it("Should not allow a user to withdraw a refund that does not exist", async function () {
@@ -1763,7 +1833,63 @@ describe("Refund", function () {
         const seller = accounts[2];
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
+
+        // Withdraw refund
+        await expect(buyerContract.withdrawRefund(seller, 0)).to.be.revertedWith("No refund has been requested for this order");
+    });
+
+    it("Should not allow a user to withdraw a refund that does not exist", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+        
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const buyer = accounts[1];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[2];
+        const sellerContract = contract.connect(seller);
+
+        // Buy
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
+
+        // Sell
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
+
+        // Withdraw refund
+        await expect(buyerContract.withdrawRefund(seller, 0)).to.be.revertedWith("No refund has been requested for this order");
+    });
+
+    it("Should not allow a user to withdraw a refund that does not exist", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+        
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const buyer = accounts[1];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[2];
+        const sellerContract = contract.connect(seller);
+
+        // Buy
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
+
+        // Sell
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
+
+        // Forward time
+        await network.provider.send("evm_increaseTime", [WARRANTY]);
+        await network.provider.send("evm_mine");
+
+        // Withdraw order
+        await expect(sellerContract.withdrawOrder(buyer, 0)).to.emit(sellerContract, ORDER_WITHDRAWN).withArgs(buyer, seller, 0);
+
+        // Withdraw refund
+        await expect(buyerContract.withdrawRefund(seller, 0)).to.be.revertedWith("No refund has been requested for this order");
     });
 
     it("Should not allow a user to withdraw a refund that is currently being processed", async function () {
@@ -1780,16 +1906,16 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Withdraw refund
-        await expect(buyerContract.withdrawRefund(seller, 1)).to.be.revertedWith("A refund is currently being processed");
+        await expect(buyerContract.withdrawRefund(seller, 0)).to.be.revertedWith("A refund is currently being processed");
     });
 
     it("Should not allow a user to withdraw a refund that has already been declined", async function () {
@@ -1809,19 +1935,19 @@ describe("Refund", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        expect(await buyerContract.requestRefund(seller, 1)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 1);
+        await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        expect(await ownerContract.resolveRefund(buyer, seller, 1, 6)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 1);
+        await expect(ownerContract.resolveRefund(buyer, seller, 0, 6)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 6);
 
         // Withdraw refund
-        await expect(buyerContract.withdrawRefund(seller, 1)).to.be.revertedWith("A refund has already been declined for this order");
+        await expect(buyerContract.withdrawRefund(seller, 0)).to.be.revertedWith("A refund has already been declined for this order");
     });
 
 });
@@ -1841,16 +1967,16 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
-        const order = await buyerContract.getOrder(buyer, seller, 1);
+        const order = await buyerContract.getOrder(buyer, seller, 0);
 
         expect(order.buyer).to.equal(buyer.address);
         expect(order.seller).to.equal(seller.address);
-        expect(order.id).to.equal(1);
+        expect(order.id).to.equal(0);
     });
 
     it("Should not allow a user to retrieve an order in the role of a buyer with an invalid buyer address", async function () {
@@ -1867,13 +1993,13 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
-        await expect(buyerContract.getOrder(ZERO_ADDRESS, seller, 1)).to.be.revertedWith("Invalid buyer address");
+        await expect(buyerContract.getOrder(ZERO_ADDRESS, seller, 0)).to.be.revertedWith("Invalid buyer address");
     });
 
     it("Should not allow a user to retrieve an order in the role of a buyer with an invalid seller address", async function () {
@@ -1890,13 +2016,13 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
-        await expect(buyerContract.getOrder(buyer, ZERO_ADDRESS, 1)).to.be.revertedWith("Invalid seller address");
+        await expect(buyerContract.getOrder(buyer, ZERO_ADDRESS, 0)).to.be.revertedWith("Invalid seller address");
     });
 
     it("Should not allow a user to retrieve an order in the role of a buyer with the same buyer and seller addresses", async function () {
@@ -1913,14 +2039,14 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
-        await expect(buyerContract.getOrder(buyer, buyer, 1)).to.be.revertedWith("Buyer and seller match");
-        await expect(buyerContract.getOrder(seller, seller, 1)).to.be.revertedWith("Buyer and seller match");
+        await expect(buyerContract.getOrder(buyer, buyer, 0)).to.be.revertedWith("Buyer and seller match");
+        await expect(buyerContract.getOrder(seller, seller, 0)).to.be.revertedWith("Buyer and seller match");
     });
 
     it("Should not allow a user to retrieve an order in the role of a buyer with an invalid order ID", async function () {
@@ -1937,36 +2063,13 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
         await expect(buyerContract.getOrder(buyer, seller, 2)).to.be.revertedWith("Invalid order ID");
-    });
-
-    it("Should not allow a user to retrieve an order in the role of a buyer that does not exist", async function () {
-        // Deploy a clean contract instance
-        const { contract } = await loadFixture(deployContractFixture);
-        
-        // Get available accounts
-        const accounts = await ethers.getSigners();
-
-        const buyer = accounts[1];
-        const buyerContract = contract.connect(buyer);
-
-        const seller = accounts[2];
-        const sellerContract = contract.connect(seller);
-
-        // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
-
-        // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
-
-        // Get order
-        await expect(buyerContract.getOrder(buyer, seller, 0)).to.be.revertedWith("Order does not exist");
     });
 
     it("Should not allow a user to retrieve an order they are not involved in", async function () {
@@ -1986,13 +2089,13 @@ describe("Get Order(s)", function () {
         const userContract = contract.connect(user);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
-        await expect(userContract.getOrder(buyer, seller, 1)).to.be.revertedWith("Unauthorized access");
+        await expect(userContract.getOrder(buyer, seller, 0)).to.be.revertedWith("Unauthorized access");
     });
 
     it("Should allow a user to retrieve an order in the role of a seller", async function () {
@@ -2009,16 +2112,16 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
-        const order = await sellerContract.getOrder(buyer, seller, 1);
+        const order = await sellerContract.getOrder(buyer, seller, 0);
 
         expect(order.buyer).to.equal(buyer.address);
         expect(order.seller).to.equal(seller.address);
-        expect(order.id).to.equal(1);
+        expect(order.id).to.equal(0);
     });
 
     it("Should not allow a user to retrieve an order in the role of a seller with an invalid buyer address", async function () {
@@ -2035,13 +2138,13 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
-        await expect(sellerContract.getOrder(ZERO_ADDRESS, seller, 1)).to.be.revertedWith("Invalid buyer address");
+        await expect(sellerContract.getOrder(ZERO_ADDRESS, seller, 0)).to.be.revertedWith("Invalid buyer address");
     });
 
     it("Should not allow a user to retrieve an order in the role of a seller with an invalid seller address", async function () {
@@ -2058,13 +2161,13 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
-        await expect(sellerContract.getOrder(buyer, ZERO_ADDRESS, 1)).to.be.revertedWith("Invalid seller address");
+        await expect(sellerContract.getOrder(buyer, ZERO_ADDRESS, 0)).to.be.revertedWith("Invalid seller address");
     });
 
     it("Should not allow a user to retrieve an order in the role of a seller with the same buyer and seller addresses", async function () {
@@ -2081,14 +2184,14 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
-        await expect(sellerContract.getOrder(buyer, buyer, 1)).to.be.revertedWith("Buyer and seller match");
-        await expect(sellerContract.getOrder(seller, seller, 1)).to.be.revertedWith("Buyer and seller match");
+        await expect(sellerContract.getOrder(buyer, buyer, 0)).to.be.revertedWith("Buyer and seller match");
+        await expect(sellerContract.getOrder(seller, seller, 0)).to.be.revertedWith("Buyer and seller match");
     });
 
     it("Should not allow a user to retrieve an order in the role of a seller with an invalid order ID", async function () {
@@ -2105,36 +2208,13 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
         await expect(sellerContract.getOrder(buyer, seller, 2)).to.be.revertedWith("Invalid order ID");
-    });
-
-    it("Should not allow a user to retrieve an order in the role of a seller that does not exist", async function () {
-        // Deploy a clean contract instance
-        const { contract } = await loadFixture(deployContractFixture);
-        
-        // Get available accounts
-        const accounts = await ethers.getSigners();
-
-        const buyer = accounts[1];
-        const buyerContract = contract.connect(buyer);
-
-        const seller = accounts[2];
-        const sellerContract = contract.connect(seller);
-
-        // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
-
-        // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
-
-        // Get order
-        await expect(sellerContract.getOrder(buyer, seller, 0)).to.be.revertedWith("Order does not exist");
     });
 
     it("Should allow the owner to retrieve any order", async function () {
@@ -2154,16 +2234,16 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
-        const order = await ownerContract.getOrder(buyer, seller, 1);
+        const order = await ownerContract.getOrder(buyer, seller, 0);
 
         expect(order.buyer).to.equal(buyer.address);
         expect(order.seller).to.equal(seller.address);
-        expect(order.id).to.equal(1);
+        expect(order.id).to.equal(0);
     });
 
     it("Should not allow the order to retrieve an order with an invalid buyer address", async function () {
@@ -2183,13 +2263,13 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
-        await expect(ownerContract.getOrder(ZERO_ADDRESS, seller, 1)).to.be.revertedWith("Invalid buyer address");
+        await expect(ownerContract.getOrder(ZERO_ADDRESS, seller, 0)).to.be.revertedWith("Invalid buyer address");
     });
 
     it("Should not allow the owner to retrieve an order with an invalid seller address", async function () {
@@ -2209,13 +2289,13 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
-        await expect(ownerContract.getOrder(buyer, ZERO_ADDRESS, 1)).to.be.revertedWith("Invalid seller address");
+        await expect(ownerContract.getOrder(buyer, ZERO_ADDRESS, 0)).to.be.revertedWith("Invalid seller address");
     });
 
     it("Should not allow the owner to retrieve an order with the same buyer and seller addresses", async function () {
@@ -2235,14 +2315,14 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
-        await expect(ownerContract.getOrder(buyer, buyer, 1)).to.be.revertedWith("Buyer and seller match");
-        await expect(ownerContract.getOrder(seller, seller, 1)).to.be.revertedWith("Buyer and seller match");
+        await expect(ownerContract.getOrder(buyer, buyer, 0)).to.be.revertedWith("Buyer and seller match");
+        await expect(ownerContract.getOrder(seller, seller, 0)).to.be.revertedWith("Buyer and seller match");
     });
 
     it("Should not allow the owner to retrieve an order with an invalid order ID", async function () {
@@ -2262,24 +2342,21 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
         await expect(ownerContract.getOrder(buyer, seller, 2)).to.be.revertedWith("Invalid order ID");
     });
 
-    it("Should not allow the owner to retrieve an order that does not exist", async function () {
+    it("Should allow a user to retrieve the total number of their orders in the role of a buyer", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
         // Get available accounts
         const accounts = await ethers.getSigners();
-
-        const owner = accounts[0];
-        const ownerContract = contract.connect(owner);
 
         const buyer = accounts[1];
         const buyerContract = contract.connect(buyer);
@@ -2288,16 +2365,16 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
-        // Get order
-        await expect(ownerContract.getOrder(buyer, seller, 0)).to.be.revertedWith("Order does not exist");
+        // Get orders length
+        expect(await buyerContract.getBuyerOrdersLength()).to.equal(1);
     });
 
-    it("Should allow a user to retrieve all their orders in the role of a buyer", async function () {
+    it("Should allow a user to retrieve the total number of their orders in the role of a seller", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
@@ -2311,27 +2388,21 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
-        const orders = await buyerContract.getBuyerOrders(buyer);
-
-        expect(orders[0].buyer).to.equal(buyer.address);
-        expect(orders[0].seller).to.equal(seller.address);
-        expect(orders[0].id).to.equal(1);
+        // Get orders length
+        expect(await sellerContract.getSellerOrdersLength()).to.equal(1);
     });
 
-    it("Should not allow a user to retrieve all their orders in the role of a buyer with an invalid buyer address", async function () {
+    it("Should allow a user to retrieve an order by index in the role of a buyer", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
         // Get available accounts
         const accounts = await ethers.getSigners();
-
-        const owner = accounts[0];
-        const ownerContract = contract.connect(owner);
 
         const buyer = accounts[1];
         const buyerContract = contract.connect(buyer);
@@ -2339,28 +2410,26 @@ describe("Get Order(s)", function () {
         const seller = accounts[2];
         const sellerContract = contract.connect(seller);
 
-        const user = accounts[3];
-        const userContract = contract.connect(user);
-
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
-        // Get order
-        await expect(userContract.getBuyerOrders(ZERO_ADDRESS)).to.be.revertedWith("Invalid buyer address");
+        // Get order by index
+        const order = await buyerContract.getBuyerOrder(0);
+
+        expect(order.buyer).to.equal(buyer.address);
+        expect(order.seller).to.equal(seller.address);
+        expect(order.id).to.equal(0);
     });
 
-    it("Should allow the owner to retrieve all the orders of a buyer", async function () {
+    it("Should not allow a user to retrieve an order with an invalid index in the role of a buyer", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
         // Get available accounts
         const accounts = await ethers.getSigners();
-
-        const owner = accounts[0];
-        const ownerContract = contract.connect(owner);
 
         const buyer = accounts[1];
         const buyerContract = contract.connect(buyer);
@@ -2369,27 +2438,21 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
-        const orders = await ownerContract.getBuyerOrders(buyer);
-
-        expect(orders[0].buyer).to.equal(buyer.address);
-        expect(orders[0].seller).to.equal(seller.address);
-        expect(orders[0].id).to.equal(1);
+        // Get order by index
+        await expect(buyerContract.getBuyerOrder(1)).to.be.revertedWith("Invalid index");
     });
 
-    it("Should not allow the owner to retrieve all the orders of a buyer with an invalid buyer address", async function () {
+    it("Should allow a user to retrieve an order by index in the role of a seller", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
         // Get available accounts
         const accounts = await ethers.getSigners();
-
-        const owner = accounts[0];
-        const ownerContract = contract.connect(owner);
 
         const buyer = accounts[1];
         const buyerContract = contract.connect(buyer);
@@ -2398,42 +2461,20 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
-        
-        // Get order
-        await expect(ownerContract.getBuyerOrders(ZERO_ADDRESS)).to.be.revertedWith("Invalid buyer address");
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
+
+        // Get order by index
+        const order = await sellerContract.getSellerOrder(0);
+
+        expect(order.buyer).to.equal(buyer.address);
+        expect(order.seller).to.equal(seller.address);
+        expect(order.id).to.equal(0);
     });
-
-    it("Should not allow a user to retrieve all the orders of a buyer unless they are involved in them", async function () {
-        // Deploy a clean contract instance
-        const { contract } = await loadFixture(deployContractFixture);
-        
-        // Get available accounts
-        const accounts = await ethers.getSigners();
-
-        const buyer = accounts[1];
-        const buyerContract = contract.connect(buyer);
-
-        const seller = accounts[2];
-        const sellerContract = contract.connect(seller);
-
-        const user = accounts[3];
-        const userContract = contract.connect(user);
-
-        // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
-
-        // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
-
-        // Get order
-        await expect(userContract.getBuyerOrders(buyer)).to.be.revertedWith("Unauthorized access");
-    });
-
-    it("Should allow a user to retrieve all their orders in the role of a seller", async function () {
+    
+    it("Should not allow a user to retrieve an order with an invalid index in the role of a seller", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
@@ -2447,123 +2488,13 @@ describe("Get Order(s)", function () {
         const sellerContract = contract.connect(seller);
 
         // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
-        const orders = await sellerContract.getSellerOrders(seller);
-
-        expect(orders[0].buyer).to.equal(buyer.address);
-        expect(orders[0].seller).to.equal(seller.address);
-        expect(orders[0].id).to.equal(1);
-    });
-
-    it("Should not allow a user to retrieve all their orders in the role of a seller with an invalid seller address", async function () {
-        // Deploy a clean contract instance
-        const { contract } = await loadFixture(deployContractFixture);
-        
-        // Get available accounts
-        const accounts = await ethers.getSigners();
-
-        const buyer = accounts[1];
-        const buyerContract = contract.connect(buyer);
-
-        const seller = accounts[2];
-        const sellerContract = contract.connect(seller);
-
-        const user = accounts[3];
-        const userContract = contract.connect(user);
-
-        // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
-
-        // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
-
-        // Get order
-        await expect(sellerContract.getSellerOrders(ZERO_ADDRESS)).to.be.revertedWith("Invalid seller address");
-    });
-
-    it("Should allow the owner to retrieve all the orders of a seller", async function () {
-        // Deploy a clean contract instance
-        const { contract } = await loadFixture(deployContractFixture);
-        
-        // Get available accounts
-        const accounts = await ethers.getSigners();
-
-        const owner = accounts[0];
-        const ownerContract = contract.connect(owner);
-
-        const buyer = accounts[1];
-        const buyerContract = contract.connect(buyer);
-
-        const seller = accounts[2];
-        const sellerContract = contract.connect(seller);
-
-        // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
-
-        // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
-
-        const orders = await ownerContract.getSellerOrders(seller);
-
-        expect(orders[0].buyer).to.equal(buyer.address);
-        expect(orders[0].seller).to.equal(seller.address);
-        expect(orders[0].id).to.equal(1);
-    });
-
-    it("Should not allow the owner to retrieve all the orders of a seller with an invalid buyer address", async function () {
-        // Deploy a clean contract instance
-        const { contract } = await loadFixture(deployContractFixture);
-        
-        // Get available accounts
-        const accounts = await ethers.getSigners();
-
-        const owner = accounts[0];
-        const ownerContract = contract.connect(owner);
-
-        const buyer = accounts[1];
-        const buyerContract = contract.connect(buyer);
-
-        const seller = accounts[2];
-        const sellerContract = contract.connect(seller);
-
-        // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
-
-        // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
-        
-        // Get order
-        await expect(ownerContract.getSellerOrders(ZERO_ADDRESS)).to.be.revertedWith("Invalid seller address");
-    });
-
-    it("Should not allow a user to retrieve all the orders of a seller unless they are involved in them", async function () {
-        // Deploy a clean contract instance
-        const { contract } = await loadFixture(deployContractFixture);
-        
-        // Get available accounts
-        const accounts = await ethers.getSigners();
-
-        const buyer = accounts[1];
-        const buyerContract = contract.connect(buyer);
-
-        const seller = accounts[2];
-        const sellerContract = contract.connect(seller);
-
-        const user = accounts[3];
-        const userContract = contract.connect(user);
-
-        // Buy
-        expect(await buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 1);
-
-        // Sell
-        expect(await sellerContract.sell(buyer, 1, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 1);
-
-        // Get order
-        await expect(userContract.getSellerOrders(seller)).to.be.revertedWith("Unauthorized access");
+        // Get order by index
+        await expect(sellerContract.getSellerOrder(1)).to.be.revertedWith("Invalid index");
     });
 
 });

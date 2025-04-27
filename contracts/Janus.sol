@@ -16,28 +16,45 @@ import "./events/Events.sol";
  */
 contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
 
-    // Order storage structure
-    /**
-    *                seller                                       buyer
-    *                  │                                            │
-    *     ┌────────────┴────────────┐                               │
-    *     ▼                         ▼                               ▼
-    * sellerLastId       sellerOrders[seller][key]        buyerOrders[seller][key] 
-    *                               │                               │
-    *                               └───────────────┬───────────────┘
-    *                                               │
-    *                                key (hash of buyer, seller, id)
-    *                                               │
-    *                                               ▼
-    *                                          Order struct
+    /**  Order storage structure    
+                                                                  
+                            seller                                buyer                     
+                                |                                    |                       
+                                |                                    |                       
+                                |                                    |                       
+                                |                                    |                       
+            +------------------------------------------------------------------------+     
+            |                                   |                                    |     
+            |                                   |                                    |     
+            |                                   |                                    |     
+            |                                   |                                    |     
+            ▼                                   |                                    ▼     
+        sellerOrders                             |                               buyerOrders
+            ▲                                   |                                    ▲     
+            |                                   ▼                                    |     
+            |                                  key                                   |     
+            |                                   |                                    |     
+            |                                   |                                    |     
+            |                                   |                                    |     
+            |                 +-----------------|-------------------+                |     
+            |                 |                                     |                |     
+            |                 |                                     |                |     
+            |                 |                                     |                |     
+            |                 ▼                                     ▼                |     
+            |           sellerIndexes                         buyerIndexes           |     
+            |                 |                                     |                |     
+            |                 |                                     |                |     
+            |                 |                                     |                |     
+            |                 |                                     |                |     
+            +-----------------+                                     +----------------+  
+   
     **/
-    mapping(address => uint256) private sellerLastId;
+    
+    mapping(address => Order[]) private sellerOrders;
+    mapping(address => mapping(bytes32 => Index)) private sellerIndexes;
 
-    mapping(address => mapping(bytes32 => Order)) private sellerOrders;
-    mapping(address => bytes32[]) private sellerOrderIds;
-
-    mapping(address => mapping(bytes32 => Order)) private buyerOrders;
-    mapping(address => bytes32[]) private buyerOrderIds;
+    mapping(address => Order[]) private buyerOrders;
+    mapping(address => mapping(bytes32 => Index)) private buyerIndexes;
 
     uint8 private constant FEE = 1; // 1% platform fee
     uint32 private constant MAX_SELL_DELAY = 24 * 60 * 60; // 24 hours
@@ -128,11 +145,20 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
         require(buyer != seller, "Buyer and seller match");
         require(price > 0, "Price must be positive");
 
-        uint256 id = ++sellerLastId[seller];
+        uint256 id = sellerOrders[seller].length;
         bytes32 key = _genKey(buyer, seller, id);
 
-        require(sellerOrders[seller][key].status == OrderStatus.None, "Order already exists");
-        require(buyerOrders[buyer][key].status == OrderStatus.None, "Order already exists");
+        if(buyerOrders[buyer].length != 0)
+        {
+            Index memory buyerIndex = buyerIndexes[buyer][key];
+            require(!buyerIndex.isSet, "Order already exists");
+        }
+        
+        if(sellerOrders[seller].length != 0)
+        {
+            Index memory sellerIndex = sellerIndexes[seller][key];
+            require(!sellerIndex.isSet, "Order already exists");
+        }
 
         Order memory order = Order({
             buyer: buyer,
@@ -143,11 +169,17 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
             status: OrderStatus.Paid
         });
 
-        sellerOrders[seller][key] = order;
-        sellerOrderIds[seller].push(key);
+        buyerOrders[buyer].push(order);
+        buyerIndexes[buyer][key] = Index({
+            index: buyerOrders[buyer].length - 1,
+            isSet: true
+        });
 
-        buyerOrders[buyer][key] = order;
-        buyerOrderIds[buyer].push(key);
+        sellerOrders[seller].push(order);
+        sellerIndexes[seller][key] = Index({
+            index: sellerOrders[seller].length - 1,
+            isSet: true
+        });
 
         return id;
     }
@@ -163,42 +195,29 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
         require(buyer != address(0), "Invalid buyer address");
         require(seller != address(0), "Invalid seller address");
         require(buyer != seller, "Buyer and seller match");
-        require(id <= sellerLastId[seller], "Invalid order ID");
+        require(id < sellerOrders[seller].length, "Invalid order ID");
 
         bytes32 key = _genKey(buyer, seller, id);
-        Order storage sellerOrder = sellerOrders[seller][key];
-        Order storage buyerOrder = buyerOrders[buyer][key];
+
+        Index storage buyerIndex = buyerIndexes[buyer][key];
+        Index storage sellerIndex = sellerIndexes[seller][key];
+
+        require(buyerIndex.isSet && sellerIndex.isSet, "Order does not exists");
+
+        Order storage buyerOrder = buyerOrders[buyer][buyerIndex.index];
+        Order storage sellerOrder = sellerOrders[seller][sellerIndex.index];
 
         require(
-            sellerOrder.buyer == buyerOrder.buyer &&
-            sellerOrder.seller == buyerOrder.seller &&
-            sellerOrder.id == buyerOrder.id &&
-            sellerOrder.price == buyerOrder.price &&
-            sellerOrder.creationDate == buyerOrder.creationDate &&
-            sellerOrder.status == buyerOrder.status,
+            buyerOrder.buyer == sellerOrder.buyer &&
+            buyerOrder.seller == sellerOrder.seller &&
+            buyerOrder.id == sellerOrder.id &&
+            buyerOrder.price == sellerOrder.price &&
+            buyerOrder.creationDate == sellerOrder.creationDate &&
+            buyerOrder.status == sellerOrder.status,
             "Order data mismatch"
         );
 
-        require(sellerOrder.status != OrderStatus.None, "Order does not exist");
         return key;
-    }
-
-    /**
-     * @dev Removes a specific order ID from the order list
-     * @param ids The array of order IDs
-     * @param key The order ID to be removed
-     */
-    function _removeOrderId(bytes32[] storage ids, bytes32 key) private {
-
-        uint256 len = ids.length;
-
-        for (uint256 i = 0; i < len; i++) {
-            if (ids[i] == key) {
-                ids[i] = ids[len - 1];
-                ids.pop();
-                break;
-            }
-        }
     }
 
     /**
@@ -224,7 +243,9 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
      */
     function sell(address buyer, uint256 id, uint256 price) external whenNotPaused nonReentrant returns (address, address, uint256) {
         bytes32 key = _validateOrder(buyer, msg.sender, id);
-        Order storage order = sellerOrders[msg.sender][key];
+
+        Index storage sellerIndex = sellerIndexes[msg.sender][key];
+        Order storage order = sellerOrders[msg.sender][sellerIndex.index];
 
         require(order.status != OrderStatus.Accepted, "Order already accepted");
         require(order.status != OrderStatus.Completed, "Order already completed");
@@ -237,8 +258,10 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
 
         require(block.timestamp - order.creationDate <= MAX_SELL_DELAY, "Order took too long to be accepted");
 
-        sellerOrders[msg.sender][key].status = OrderStatus.Accepted;
-        buyerOrders[buyer][key].status = OrderStatus.Accepted;
+        sellerOrders[msg.sender][sellerIndex.index].status = OrderStatus.Accepted;
+
+        Index storage buyerIndex = buyerIndexes[buyer][key];
+        buyerOrders[buyer][buyerIndex.index].status = OrderStatus.Accepted;
 
         emit OrderAccepted(buyer, msg.sender, id);
         return (buyer, msg.sender, id);
@@ -251,7 +274,8 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
      */
     function withdrawOrder(address buyer, uint256 id) external whenNotPaused nonReentrant returns (address, address, uint256) {
         bytes32 key = _validateOrder(buyer, msg.sender, id);
-        Order storage order = sellerOrders[msg.sender][key];
+        Index storage sellerIndex = sellerIndexes[msg.sender][key];
+        Order storage order = sellerOrders[msg.sender][sellerIndex.index];
 
         require(order.seller == msg.sender, "You are not the seller of this order");
 
@@ -269,14 +293,10 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
         uint256 amount = order.price * (100 - FEE) / 100;
         uint256 fee = order.price - amount;
 
-        sellerOrders[msg.sender][key].status = OrderStatus.Completed;
-        buyerOrders[buyer][key].status = OrderStatus.Completed;
+        sellerOrders[msg.sender][sellerIndex.index].status = OrderStatus.Completed;
 
-        delete sellerOrders[msg.sender][key];
-        _removeOrderId(sellerOrderIds[msg.sender], key);
-
-        delete buyerOrders[buyer][key];
-        _removeOrderId(buyerOrderIds[buyer], key);
+        Index storage buyerIndex = buyerIndexes[buyer][key];
+        buyerOrders[buyer][buyerIndex.index].status = OrderStatus.Completed;
 
         payable(msg.sender).transfer(amount);
         payable(owner()).transfer(fee);
@@ -292,23 +312,20 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
      */
     function requestRefund(address seller, uint256 id) external whenNotPaused nonReentrant returns (address, address, uint256) {
         bytes32 key = _validateOrder(msg.sender, seller, id);
-        Order storage order = sellerOrders[seller][key];
+        Index storage sellerIndex = sellerIndexes[seller][key];
+        Order storage order = sellerOrders[seller][sellerIndex.index];
 
         require(order.buyer == msg.sender, "You are not the buyer of this order");
+
+        Index storage buyerIndex = buyerIndexes[msg.sender][key];
 
         if(order.status == OrderStatus.Paid) {
 
             require(block.timestamp - order.creationDate > MAX_SELL_DELAY, "Order has to be accepted first");
 
             // Automatically complete the order
-            sellerOrders[seller][key].status = OrderStatus.Completed;
-            buyerOrders[msg.sender][key].status = OrderStatus.Completed;
-
-            delete sellerOrders[seller][key];
-            _removeOrderId(sellerOrderIds[seller], key);
-
-            delete buyerOrders[msg.sender][key];
-            _removeOrderId(buyerOrderIds[msg.sender], key);
+            sellerOrders[seller][sellerIndex.index].status = OrderStatus.Completed;
+            buyerOrders[msg.sender][buyerIndex.index].status = OrderStatus.Completed;
 
             payable(msg.sender).transfer(order.price);
 
@@ -328,8 +345,8 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
             require(block.timestamp <= order.creationDate + WARRANTY, "Refund window closed");
         }
 
-        sellerOrders[seller][key].status = OrderStatus.PendingRefund;
-        buyerOrders[msg.sender][key].status = OrderStatus.PendingRefund;
+        sellerOrders[seller][sellerIndex.index].status = OrderStatus.PendingRefund;
+        buyerOrders[msg.sender][buyerIndex.index].status = OrderStatus.PendingRefund;
 
         emit RefundRequested(msg.sender, seller, id);
         return (msg.sender, seller, id);
@@ -342,7 +359,8 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
      */
     function revokeRefund(address seller, uint256 id) external whenNotPaused nonReentrant returns (address, address, uint256) {
         bytes32 key = _validateOrder(msg.sender, seller, id);
-        Order storage order = sellerOrders[seller][key];
+        Index storage sellerIndex = sellerIndexes[seller][key];
+        Order storage order = sellerOrders[seller][sellerIndex.index];
 
         require(order.buyer == msg.sender, "You are not the buyer of this order");
 
@@ -353,8 +371,10 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
         require(order.status != OrderStatus.DeclinedRefund, "A refund has already been declined for this order");
         require(order.status == OrderStatus.PendingRefund, "Invalid order status");
 
-        sellerOrders[seller][key].status = OrderStatus.Accepted;
-        buyerOrders[msg.sender][key].status = OrderStatus.Accepted;
+        sellerOrders[seller][sellerIndex.index].status = OrderStatus.Accepted;
+
+        Index storage buyerIndex = buyerIndexes[msg.sender][key];
+        buyerOrders[msg.sender][buyerIndex.index].status = OrderStatus.Accepted;
 
         emit RefundRevoked(msg.sender, seller, id);
         return (msg.sender, seller, id);
@@ -372,7 +392,8 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
         require(newStatus == OrderStatus.AcceptedRefund || newStatus == OrderStatus.DeclinedRefund, "Invalid new refund status");
 
         bytes32 key = _validateOrder(buyer, seller, id);
-        Order storage order = sellerOrders[seller][key];
+        Index storage sellerIndex = sellerIndexes[seller][key];
+        Order storage order = sellerOrders[seller][sellerIndex.index];
 
         require(order.status != OrderStatus.Paid, "No refund has been requested for this order");
         require(order.status != OrderStatus.Accepted, "No refund has been requested for this order");
@@ -381,8 +402,10 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
         require(order.status != OrderStatus.DeclinedRefund, "A refund has already been declined for this order");
         require(order.status == OrderStatus.PendingRefund, "Invalid order status");
 
-        sellerOrders[seller][key].status = newStatus;
-        buyerOrders[buyer][key].status = newStatus;
+        sellerOrders[seller][sellerIndex.index].status = newStatus;
+
+        Index storage buyerIndex = buyerIndexes[buyer][key];
+        buyerOrders[buyer][buyerIndex.index].status = newStatus;
         
         emit RefundResolved(buyer, seller, id, newStatus);
         return (buyer, seller, id, newStatus);
@@ -395,7 +418,8 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
      */
     function withdrawRefund(address seller, uint256 id) external whenNotPaused nonReentrant returns (address, address, uint256) {
         bytes32 key = _validateOrder(msg.sender, seller, id);
-        Order storage order = sellerOrders[seller][key];
+        Index storage sellerIndex = sellerIndexes[seller][key];
+        Order storage order = sellerOrders[seller][sellerIndex.index];
 
         require(order.buyer == msg.sender, "You are not the buyer of this order");
 
@@ -406,14 +430,10 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
         require(order.status != OrderStatus.DeclinedRefund, "A refund has already been declined for this order");
         require(order.status == OrderStatus.AcceptedRefund, "Invalid order status");
 
-        sellerOrders[seller][key].status = OrderStatus.Completed;
-        buyerOrders[msg.sender][key].status = OrderStatus.Completed;
+        sellerOrders[seller][sellerIndex.index].status = OrderStatus.Completed;
 
-        delete sellerOrders[seller][key];
-        _removeOrderId(sellerOrderIds[seller], key);
-
-        delete buyerOrders[msg.sender][key];
-        _removeOrderId(buyerOrderIds[msg.sender], key);
+        Index storage buyerIndex = buyerIndexes[msg.sender][key];
+        buyerOrders[msg.sender][buyerIndex.index].status = OrderStatus.Completed;
 
         payable(msg.sender).transfer(order.price);
 
@@ -422,62 +442,55 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     }
 
     /**
-     * @dev Returns order details
-     * @param buyer Buyer's address
-     * @param seller Seller's address
-     * @param id Order ID
-     */
+    * @dev Returns the order details for a given buyer, seller, and order ID.
+    * @param buyer Address of the buyer.
+    * @param seller Address of the seller.
+    * @param id Unique identifier of the order.
+    * @return The requested Order.
+    */
     function getOrder(address buyer, address seller, uint256 id) public view returns (Order memory) {
         bytes32 key = _validateOrder(buyer, seller, id);
-        Order storage storedOrder = sellerOrders[seller][key];
+        Index storage sellerIndex = sellerIndexes[seller][key];
+        Order storage order = sellerOrders[seller][sellerIndex.index];
 
-        require(
-            msg.sender == storedOrder.buyer || 
-            msg.sender == storedOrder.seller || 
-            msg.sender == owner(),
-            "Unauthorized access"
-        );
-
-        // Copy storage struct into memory before returning
-        Order memory order = Order({
-            buyer: storedOrder.buyer,
-            seller: storedOrder.seller,
-            id: storedOrder.id,
-            price: storedOrder.price,
-            creationDate: storedOrder.creationDate,
-            status: storedOrder.status
-        });
-
+        require(msg.sender == order.buyer || msg.sender == order.seller || msg.sender == owner(), "Unauthorized access");
         return order;
     }
 
-    function getBuyerOrders(address buyer) public view returns (Order[] memory) {
-        
-        require(buyer != address(0), "Invalid buyer address");
-        require(msg.sender == buyer || msg.sender == owner(), "Unauthorized access");
-
-        uint len = buyerOrderIds[buyer].length;
-        Order[] memory orders = new Order[](len);
-
-        for (uint i = 0; i < len; i++) {
-            orders[i] = buyerOrders[buyer][buyerOrderIds[buyer][i]];
-        }
-
-        return orders;
+    /**
+    * @dev Returns the number of orders placed by the caller as a buyer.
+    * @return Total number of buyer orders.
+    */
+    function getBuyerOrdersLength() public view returns (uint256) {
+        return buyerOrders[msg.sender].length;
     }
 
-    function getSellerOrders(address seller) public view returns (Order[] memory) {
-        
-        require(seller != address(0), "Invalid seller address");
-        require(msg.sender == seller || msg.sender == owner(), "Unauthorized access");
-
-        uint len = sellerOrderIds[seller].length;
-        Order[] memory orders = new Order[](len);
-
-        for (uint i = 0; i < len; i++) {
-            orders[i] = sellerOrders[seller][sellerOrderIds[seller][i]];
-        }
-
-        return orders;
+    /**
+    * @dev Returns the buyer's order at a specific index.
+    * @param index Index of the order in the buyer's order list.
+    * @return The requested Order.
+    */
+    function getBuyerOrder(uint256 index) public view returns (Order memory) {
+        require(index < buyerOrders[msg.sender].length, "Invalid index");
+        return buyerOrders[msg.sender][index];
     }
+
+    /**
+    * @dev Returns the number of orders associated with the caller as a seller.
+    * @return Total number of seller orders.
+    */
+    function getSellerOrdersLength() public view returns (uint256) {
+        return sellerOrders[msg.sender].length;
+    }
+
+    /**
+    * @dev Returns the seller's order at a specific index.
+    * @param index Index of the order in the seller's order list.
+    * @return The requested Order struct.
+    */
+    function getSellerOrder(uint256 index) public view returns (Order memory) {
+        require(index < sellerOrders[msg.sender].length, "Invalid index");
+        return sellerOrders[msg.sender][index];
+    }
+
 }

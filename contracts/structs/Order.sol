@@ -12,3 +12,8 @@ struct Order {
     uint256 creationDate;
     OrderStatus status;
 }
+
+struct Index {
+    uint256 index;
+    bool isSet;
+}
