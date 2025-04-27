@@ -22,6 +22,9 @@ const REFUND_WITHDRAWN = "RefundWithdrawn";
 const PAUSED = "Paused";
 const UNPAUSED = "Unpaused";
 
+const NEW_ORDERS_PAUSED = "NewOrdersPaused";
+const NEW_ORDERS_UNPAUSED = "NewOrdersUnpaused";
+
 async function deployContractFixture() {
         
     // Get the ContractFactory for the contract
@@ -245,6 +248,71 @@ describe("Pause / Unpause", function () {
 
         // Unpause
         await expect(userContract.unpause()).to.be.revertedWithCustomError(userContract, "OwnableUnauthorizedAccount").withArgs(user.address);
+    });
+
+    it("Should allow the owner to pause the creation of new orders", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const owner = accounts[0];
+        const ownerContract = contract.connect(owner);
+
+        // Pause
+        await expect(ownerContract.pauseNewOrders()).to.emit(ownerContract, NEW_ORDERS_PAUSED).withArgs(owner);
+    });
+
+    it("Should allow the owner to unpause the creation of new orders", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const owner = accounts[0];
+        const ownerContract = contract.connect(owner);
+
+        // Pause
+        await expect(ownerContract.pauseNewOrders()).to.emit(ownerContract, NEW_ORDERS_PAUSED).withArgs(owner);
+
+        // Unpause
+        await expect(ownerContract.unpauseNewOrders()).to.emit(ownerContract, NEW_ORDERS_UNPAUSED).withArgs(owner);
+    });
+
+    it("Should not allow a to pause the creation of new orders", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const user = accounts[1];
+        const userContract = contract.connect(user);
+
+        // Pause
+        await expect(userContract.pauseNewOrders()).to.be.revertedWithCustomError(userContract, "OwnableUnauthorizedAccount").withArgs(user.address);
+    });
+
+    it("Should allow the owner to unpause the creation of new orders", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const owner = accounts[0];
+        const ownerContract = contract.connect(owner);
+        
+        const user = accounts[1];
+        const userContract = contract.connect(user);
+
+        // Pause
+        await expect(ownerContract.pauseNewOrders()).to.emit(ownerContract, NEW_ORDERS_PAUSED).withArgs(owner);
+        
+        // Unpause
+        await expect(userContract.unpauseNewOrders()).to.be.revertedWithCustomError(userContract, "OwnableUnauthorizedAccount").withArgs(user.address);
     });
 });
 

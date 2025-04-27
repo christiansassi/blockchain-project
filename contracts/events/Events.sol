@@ -6,6 +6,9 @@ import "../enums/OrderStatus.sol";
 /// @dev Events interface for the Janus contract.
 interface Events {
 
+    event NewOrdersPaused(address indexed owner);
+    event NewOrdersUnpaused(address indexed owner);
+
     event OrderPaid(address indexed buyer, address indexed seller, uint256 id);
     event OrderAccepted(address indexed buyer, address indexed seller, uint256 id);
     event OrderWithdrawn(address indexed buyer, address indexed seller, uint256 id);

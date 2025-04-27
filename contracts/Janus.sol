@@ -60,6 +60,8 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     uint32 private constant MAX_SELL_DELAY = 24 * 60 * 60; // 24 hours
     uint32 private constant WARRANTY = 30 * 24 * 60 * 60; // 30 days
 
+    bool private acceptNewOrder = true;
+
     constructor() Ownable(msg.sender) {}
 
     /**
@@ -75,6 +77,25 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     function unpause() external onlyOwner {
         _unpause();
     }
+
+    /**
+    * @dev Pauses the creation of new orders. 
+    *      Only callable by the contract owner.
+    */
+    function pauseNewOrders() external onlyOwner {
+        acceptNewOrder = false;
+        emit NewOrdersPaused(owner());
+    }
+
+    /**
+    * @dev Unpauses the creation of new orders, allowing new orders to be created.
+    *      Only callable by the contract owner.
+    */
+    function unpauseNewOrders() external onlyOwner {
+        acceptNewOrder = true;
+        emit NewOrdersUnpaused(owner());
+    }
+
 
     /**
      * @dev Disabled function to prevent renouncing ownership. Always reverts.
@@ -227,6 +248,7 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
      */
     function buy(address seller, uint256 price) external payable whenNotPaused nonReentrant returns (address, address, uint256) {
 
+        require(acceptNewOrder, "New orders cannot be created at this time.");
         require(msg.value == price, "Incorrect payment amount");
 
         uint256 id = _createOrder(msg.sender, seller, price);
@@ -242,6 +264,9 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
      * @param price Expected order price
      */
     function sell(address buyer, uint256 id, uint256 price) external whenNotPaused nonReentrant returns (address, address, uint256) {
+
+        require(acceptNewOrder, "New orders cannot be created at this time.");
+
         bytes32 key = _validateOrder(buyer, msg.sender, id);
 
         Index storage sellerIndex = sellerIndexes[msg.sender][key];
