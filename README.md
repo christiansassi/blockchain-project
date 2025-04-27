@@ -125,7 +125,7 @@ To import an account into MetaMask, click on `+ Add account or hardware wallet` 
 
 ## Running Tests
 
-These commands execute the test cases inside the [tests.js](test/tests.js) file. There are a total of 105 test cases designed to verify the correct functioning of the contract by creating various scenarios that test its functionalities and check for potential bugs in the contract logic. Specifically, the test cases also ensure that every `require` statement within the contract works as intended. However, it is important to note that some requirements *must always* be satisfied. In other words, at the time of development, we could not conceive of a specific test case capable of breaking these requirements.
+These commands execute the test cases inside the [tests.js](test/tests.js) file. There are a total of 107 test cases designed to verify the correct functioning of the contract by creating various scenarios that test its functionalities and check for potential bugs in the contract logic. Specifically, the test cases also ensure that every `require` statement within the contract works as intended. However, it is important to note that some requirements *must always* be satisfied. In other words, at the time of development, we could not conceive of a specific test case capable of breaking these requirements.
 
 You can run one of the following commands:
 

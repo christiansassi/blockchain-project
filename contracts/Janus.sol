@@ -88,7 +88,7 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     * @dev Pauses the creation of new orders. 
     */
     function pauseNewOrders() external onlyOwner {
-        newOrderPaused = false;
+        newOrderPaused = true;
         emit NewOrdersPaused(owner());
     }
 
@@ -96,7 +96,7 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     * @dev Unpauses the creation of new orders, allowing new orders to be created.
     */
     function unpauseNewOrders() external onlyOwner {
-        newOrderPaused = true;
+        newOrderPaused = false;
         emit NewOrdersUnpaused(owner());
     }
 
@@ -484,7 +484,7 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     * @param id Unique identifier of the order.
     * @return The requested Order.
     */
-    function getOrder(address buyer, address seller, uint256 id) public view returns (Order memory) {
+    function getOrder(address buyer, address seller, uint256 id) external view whenNotPaused returns (Order memory) {
         bytes32 key = _validateOrder(buyer, seller, id);
         Index storage sellerIndex = sellerIndexes[seller][key];
         Order storage order = sellerOrders[seller][sellerIndex.index];
@@ -497,7 +497,7 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     * @dev Returns the number of orders placed by the caller as a buyer.
     * @return Total number of buyer orders.
     */
-    function getBuyerOrdersLength() public view returns (uint256) {
+    function getBuyerOrdersLength() external view whenNotPaused returns (uint256) {
         return buyerOrders[msg.sender].length;
     }
 
@@ -506,7 +506,7 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     * @param index Index of the order in the buyer's order list.
     * @return The requested Order.
     */
-    function getBuyerOrder(uint256 index) public view returns (Order memory) {
+    function getBuyerOrder(uint256 index) external view whenNotPaused returns (Order memory) {
         require(index < buyerOrders[msg.sender].length, "Invalid index");
         return buyerOrders[msg.sender][index];
     }
@@ -515,7 +515,7 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     * @dev Returns the number of orders associated with the caller as a seller.
     * @return Total number of seller orders.
     */
-    function getSellerOrdersLength() public view returns (uint256) {
+    function getSellerOrdersLength() external view whenNotPaused returns (uint256) {
         return sellerOrders[msg.sender].length;
     }
 
@@ -524,7 +524,7 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     * @param index Index of the order in the seller's order list.
     * @return The requested Order struct.
     */
-    function getSellerOrder(uint256 index) public view returns (Order memory) {
+    function getSellerOrder(uint256 index) external view whenNotPaused returns (Order memory) {
         require(index < sellerOrders[msg.sender].length, "Invalid index");
         return sellerOrders[msg.sender][index];
     }

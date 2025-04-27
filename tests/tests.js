@@ -250,6 +250,30 @@ describe("Pause / Unpause", function () {
         await expect(userContract.unpause()).to.be.revertedWithCustomError(userContract, "OwnableUnauthorizedAccount").withArgs(user.address);
     });
 
+    it("Should allow a user to retrive the status of the contract", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const owner = accounts[0];
+        const ownerContract = contract.connect(owner);
+        
+        const user = accounts[1];
+        const userContract = contract.connect(user);
+
+        // Pause
+        await expect(ownerContract.pause()).to.emit(ownerContract, PAUSED).withArgs(owner);
+        
+        expect(await userContract.isPaused()).to.equal(true);
+
+        // Unpause
+        await expect(ownerContract.unpause()).to.emit(ownerContract, UNPAUSED).withArgs(owner);
+
+        expect(await userContract.isPaused()).to.equal(false);
+    });
+
     it("Should allow the owner to pause the creation of new orders", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
@@ -313,6 +337,30 @@ describe("Pause / Unpause", function () {
         
         // Unpause
         await expect(userContract.unpauseNewOrders()).to.be.revertedWithCustomError(userContract, "OwnableUnauthorizedAccount").withArgs(user.address);
+    });
+
+    it("Should allow a user to retrive the status of the contract", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const owner = accounts[0];
+        const ownerContract = contract.connect(owner);
+        
+        const user = accounts[1];
+        const userContract = contract.connect(user);
+
+        // Pause
+        await expect(ownerContract.pauseNewOrders()).to.emit(ownerContract, NEW_ORDERS_PAUSED).withArgs(owner);
+        
+        expect(await userContract.areNewOrdersPaused()).to.equal(true);
+
+        // Unpause
+        await expect(ownerContract.unpauseNewOrders()).to.emit(ownerContract, NEW_ORDERS_UNPAUSED).withArgs(owner);
+
+        expect(await userContract.areNewOrdersPaused()).to.equal(false);
     });
 });
 
