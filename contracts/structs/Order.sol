@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../enums/OrderStatus.sol";
 
-/// @dev Order struct containing all the necessary details about an order.
+// @dev Order struct containing all the necessary details about an order.
 struct Order {
     address buyer;
     address seller;

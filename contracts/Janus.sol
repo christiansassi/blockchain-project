@@ -10,10 +10,8 @@ import "./enums/OrderStatus.sol";
 import "./events/Events.sol";
 
 /**
- * @dev This escrow contract facilitates secure transactions between buyers and sellers.
- * Funds are held in contract until order expiration, with a 1% platform fee.
- * Buyers can request refunds before expiration, which are manually reviewed.
- */
+* @dev For more info: https://github.com/christiansassi/blockchain-project
+*/
 contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
 
     /**  Order storage structure    
@@ -60,7 +58,7 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     uint32 private constant MAX_SELL_DELAY = 24 * 60 * 60; // 24 hours
     uint32 private constant WARRANTY = 30 * 24 * 60 * 60; // 30 days
 
-    bool private acceptNewOrder = true;
+    bool private newOrderPaused = true;
 
     constructor() Ownable(msg.sender) {}
 
@@ -79,87 +77,100 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     }
 
     /**
+    * @dev Returns whether the contract is paused.
+    * @return `true` if the contract is paused, `false` otherwise.
+    */
+    function isPaused() public view returns (bool) {
+        return paused();
+    }
+
+    /**
     * @dev Pauses the creation of new orders. 
-    *      Only callable by the contract owner.
     */
     function pauseNewOrders() external onlyOwner {
-        acceptNewOrder = false;
+        newOrderPaused = false;
         emit NewOrdersPaused(owner());
     }
 
     /**
     * @dev Unpauses the creation of new orders, allowing new orders to be created.
-    *      Only callable by the contract owner.
     */
     function unpauseNewOrders() external onlyOwner {
-        acceptNewOrder = true;
+        newOrderPaused = true;
         emit NewOrdersUnpaused(owner());
     }
 
+    /**
+    * @dev Returns whether new orders are paused.
+    * @return `true` if new orders are paused, `false` otherwise.
+    */
+    function areNewOrdersPaused() public view returns (bool) {
+        return newOrderPaused;
+    }
 
     /**
-     * @dev Disabled function to prevent renouncing ownership. Always reverts.
-     */
+    * @dev Disabled function to prevent renouncing ownership. Always reverts.
+    */
     function renounceOwnership() public view override onlyOwner {
         revert("Renouncing ownership is disabled");
     }
 
     /**
-     * @dev Transfers contract ownership to a new address.
-     * @param newOwner The address of the new owner.
-     */
+    * @dev Transfers contract ownership to a new address.
+    * @param newOwner The address of the new owner.
+    */
     function updateOwner(address newOwner) external onlyOwner {
         transferOwnership(newOwner);
     }
 
     /**
-     * @dev Returns the current owner's address.
-     * @return The address of the contract owner.
-     */
+    * @dev Returns the current owner's address.
+    * @return The address of the contract owner.
+    */
     function getOwner() public view returns (address) {
         return owner();
     }
 
     /**
-     * @dev Returns the fixed service fee.
-     * @return The fee value as a uint8.
-     */
+    * @dev Returns the fixed service fee.
+    * @return The fee value as a uint8.
+    */
     function getFee() public pure returns (uint8) {
         return FEE;
     }
 
     /**
-     * @dev Returns the maximum delay allowed for selling.
-     * @return The max sell delay in seconds.
-     */
+    * @dev Returns the maximum delay allowed for selling.
+    * @return The max sell delay in seconds.
+    */
     function getMaxSellDelay() public pure returns (uint32) {
         return MAX_SELL_DELAY;
     }
 
     /**
-     * @dev Returns the warranty duration.
-     * @return The warranty duration in seconds.
-     */
+    * @dev Returns the warranty duration.
+    * @return The warranty duration in seconds.
+    */
     function getWarranty() public pure returns (uint32) {
         return WARRANTY;
     }
 
     /**
-     * @dev Generates a unique order key
-     * @param buyer Buyer's address
-     * @param seller Seller's address
-     * @param id Order ID
-     */
+    * @dev Generates a unique order key
+    * @param buyer Buyer's address
+    * @param seller Seller's address
+    * @param id Order ID
+    */
     function _genKey(address buyer, address seller, uint256 id) private pure returns (bytes32) {
         return keccak256(abi.encode(buyer, seller, id));
     }
 
     /**
-     * @dev Creates a new order
-     * @param buyer Buyer's address
-     * @param seller Seller's address
-     * @param price Order price in wei
-     */
+    * @dev Creates a new order
+    * @param buyer Buyer's address
+    * @param seller Seller's address
+    * @param price Order price in wei
+    */
     function _createOrder(address buyer, address seller, uint256 price) private returns (uint256) {
         require(buyer != address(0), "Invalid buyer address");
         require(seller != address(0), "Invalid seller address");
@@ -206,11 +217,11 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     }
 
     /**
-     * @dev Validates order consistency between buyer/seller records
-     * @param buyer Buyer's address
-     * @param seller Seller's address
-     * @param id Order ID
-     */
+    * @dev Validates order consistency between buyer/seller records
+    * @param buyer Buyer's address
+    * @param seller Seller's address
+    * @param id Order ID
+    */
     function _validateOrder(address buyer, address seller, uint256 id) private view returns (bytes32) {
 
         require(buyer != address(0), "Invalid buyer address");
@@ -242,13 +253,13 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     }
 
     /**
-     * @dev Buyer initiates an order
-     * @param seller Seller's address
-     * @param price Order price in wei
-     */
+    * @dev Buyer initiates an order
+    * @param seller Seller's address
+    * @param price Order price in wei
+    */
     function buy(address seller, uint256 price) external payable whenNotPaused nonReentrant returns (address, address, uint256) {
 
-        require(acceptNewOrder, "New orders cannot be created at this time.");
+        require(newOrderPaused, "New orders cannot be created at this time.");
         require(msg.value == price, "Incorrect payment amount");
 
         uint256 id = _createOrder(msg.sender, seller, price);
@@ -258,14 +269,14 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     }
 
     /**
-     * @dev Seller accepts a paid order
-     * @param buyer Buyer's address
-     * @param id Order ID
-     * @param price Expected order price
-     */
+    * @dev Seller accepts a paid order
+    * @param buyer Buyer's address
+    * @param id Order ID
+    * @param price Expected order price
+    */
     function sell(address buyer, uint256 id, uint256 price) external whenNotPaused nonReentrant returns (address, address, uint256) {
 
-        require(acceptNewOrder, "New orders cannot be created at this time.");
+        require(newOrderPaused, "New orders cannot be created at this time.");
 
         bytes32 key = _validateOrder(buyer, msg.sender, id);
 
@@ -293,10 +304,10 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     }
 
     /**
-     * @dev Seller withdraws funds after completion
-     * @param buyer Buyer's address
-     * @param id Order ID
-     */
+    * @dev Seller withdraws funds after completion
+    * @param buyer Buyer's address
+    * @param id Order ID
+    */
     function withdrawOrder(address buyer, uint256 id) external whenNotPaused nonReentrant returns (address, address, uint256) {
         bytes32 key = _validateOrder(buyer, msg.sender, id);
         Index storage sellerIndex = sellerIndexes[msg.sender][key];
@@ -331,10 +342,10 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     }
 
     /**
-     * @dev Buyer requests refund
-     * @param seller Seller's address
-     * @param id Order ID
-     */
+    * @dev Buyer requests refund
+    * @param seller Seller's address
+    * @param id Order ID
+    */
     function requestRefund(address seller, uint256 id) external whenNotPaused nonReentrant returns (address, address, uint256) {
         bytes32 key = _validateOrder(msg.sender, seller, id);
         Index storage sellerIndex = sellerIndexes[seller][key];
@@ -378,10 +389,10 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     }
 
     /**
-     * @dev Buyer revokes refund request
-     * @param seller Seller's address
-     * @param id Order ID
-     */
+    * @dev Buyer revokes refund request
+    * @param seller Seller's address
+    * @param id Order ID
+    */
     function revokeRefund(address seller, uint256 id) external whenNotPaused nonReentrant returns (address, address, uint256) {
         bytes32 key = _validateOrder(msg.sender, seller, id);
         Index storage sellerIndex = sellerIndexes[seller][key];
@@ -406,12 +417,12 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     }
 
     /**
-     * @dev Owner resolves refund request
-     * @param buyer Buyer's address
-     * @param seller Seller's address
-     * @param id Order ID
-     * @param newStatus Either AcceptedRefund or DeclinedRefund
-     */
+    * @dev Owner resolves refund request
+    * @param buyer Buyer's address
+    * @param seller Seller's address
+    * @param id Order ID
+    * @param newStatus Either AcceptedRefund or DeclinedRefund
+    */
     function resolveRefund(address buyer, address seller, uint256 id, OrderStatus newStatus) external whenNotPaused onlyOwner nonReentrant returns (address, address, uint256, OrderStatus) {
         
         require(newStatus == OrderStatus.AcceptedRefund || newStatus == OrderStatus.DeclinedRefund, "Invalid new refund status");
@@ -437,10 +448,10 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     }
 
     /**
-     * @dev Buyer withdraws approved refund
-     * @param seller Seller's address
-     * @param id Order ID
-     */
+    * @dev Buyer withdraws approved refund
+    * @param seller Seller's address
+    * @param id Order ID
+    */
     function withdrawRefund(address seller, uint256 id) external whenNotPaused nonReentrant returns (address, address, uint256) {
         bytes32 key = _validateOrder(msg.sender, seller, id);
         Index storage sellerIndex = sellerIndexes[seller][key];
