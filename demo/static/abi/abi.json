@@ -1,5 +1,5 @@
 {
-    "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
     "abi": [
         {
             "inputs": [],
@@ -281,6 +281,19 @@
             "type": "event"
         },
         {
+            "inputs": [],
+            "name": "areNewOrdersPaused",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
             "inputs": [
                 {
                     "internalType": "address",
@@ -312,70 +325,6 @@
                 }
             ],
             "stateMutability": "payable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "index",
-                    "type": "uint256"
-                }
-            ],
-            "name": "getBuyerOrder",
-            "outputs": [
-                {
-                    "components": [
-                        {
-                            "internalType": "address",
-                            "name": "buyer",
-                            "type": "address"
-                        },
-                        {
-                            "internalType": "address",
-                            "name": "seller",
-                            "type": "address"
-                        },
-                        {
-                            "internalType": "uint256",
-                            "name": "id",
-                            "type": "uint256"
-                        },
-                        {
-                            "internalType": "uint256",
-                            "name": "price",
-                            "type": "uint256"
-                        },
-                        {
-                            "internalType": "uint256",
-                            "name": "creationDate",
-                            "type": "uint256"
-                        },
-                        {
-                            "internalType": "enum OrderStatus",
-                            "name": "status",
-                            "type": "uint8"
-                        }
-                    ],
-                    "internalType": "struct Order",
-                    "name": "",
-                    "type": "tuple"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "getBuyerOrdersLength",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
             "type": "function"
         },
         {
@@ -466,13 +415,51 @@
             "type": "function"
         },
         {
-            "inputs": [],
-            "name": "getOwner",
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "index",
+                    "type": "uint256"
+                }
+            ],
+            "name": "getOrderAtIndexAsSeller",
             "outputs": [
                 {
-                    "internalType": "address",
+                    "components": [
+                        {
+                            "internalType": "address",
+                            "name": "buyer",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "seller",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "id",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "price",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "creationDate",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "enum OrderStatus",
+                            "name": "status",
+                            "type": "uint8"
+                        }
+                    ],
+                    "internalType": "struct Order",
                     "name": "",
-                    "type": "address"
+                    "type": "tuple"
                 }
             ],
             "stateMutability": "view",
@@ -481,12 +468,17 @@
         {
             "inputs": [
                 {
+                    "internalType": "address",
+                    "name": "seller",
+                    "type": "address"
+                },
+                {
                     "internalType": "uint256",
                     "name": "index",
                     "type": "uint256"
                 }
             ],
-            "name": "getSellerOrder",
+            "name": "getOrderAtIndexFromSeller",
             "outputs": [
                 {
                     "components": [
@@ -531,12 +523,44 @@
         },
         {
             "inputs": [],
-            "name": "getSellerOrdersLength",
+            "name": "getOrderCountAsSeller",
             "outputs": [
                 {
                     "internalType": "uint256",
                     "name": "",
                     "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "seller",
+                    "type": "address"
+                }
+            ],
+            "name": "getOrderCountFromSeller",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "getOwner",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
                 }
             ],
             "stateMutability": "view",
@@ -553,6 +577,19 @@
                 }
             ],
             "stateMutability": "pure",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "isPaused",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
             "type": "function"
         },
         {

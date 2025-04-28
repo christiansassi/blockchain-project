@@ -53,7 +53,7 @@ async function createOrders() {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         const sender = accounts[0];
 
-        const orderNum = await window.contract.methods.getSellerOrdersLength().call({ from: sender })
+        const orderNum = await window.contract.methods.getOrderCountAsSeller().call({from: sender})
 
         console.log(orderNum);
 
@@ -75,7 +75,7 @@ async function createOrders() {
         const now = Math.floor(Date.now() / 1000);
 
         for(let i=0; i<orderNum; i++) {
-            const order = await window.contract.methods.getSellerOrder(i).call({ from: sender });
+            const order = await window.contract.methods.getOrderAtIndexAsSeller(i).call({from: sender});
             
             const buyer = order.buyer;
             const seller = order.seller;
