@@ -151,6 +151,16 @@ describe("Constants", function () {
         // Get warranty
         expect(await contract.getWarranty()).to.equal(WARRANTY);
     });
+
+    it("Should retrun the creation block number", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+
+        const creationBlockNumber = await ethers.provider.getBlockNumber();
+
+        // Get creation block number
+        expect(await contract.getCreationBlockNumber()).to.equal(creationBlockNumber);
+    });
 });
 
 describe("Pause / Unpause", function () {

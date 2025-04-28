@@ -22,10 +22,13 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     uint8 private constant FEE = 1; // 1% platform fee
     uint32 private constant MAX_SELL_DELAY = 24 * 60 * 60; // 24 hours
     uint32 private constant WARRANTY = 30 * 24 * 60 * 60; // 30 days
+    uint256 private immutable CREATION_BLOCK_NUMBER;
 
     bool private newOrderPaused = true;
 
-    constructor() Ownable(msg.sender) {}
+    constructor() Ownable(msg.sender) {
+        CREATION_BLOCK_NUMBER = block.number;
+    }
 
     /**
      * @dev Pauses the contract. Can only be called by the owner.
@@ -118,6 +121,14 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     */
     function getWarranty() public pure returns (uint32) {
         return WARRANTY;
+    }
+
+    /**
+    * @dev Returns the creation block number.
+    * @return The creation block number.
+    */
+    function getCreationBlockNumber() public view returns (uint256) {
+        return CREATION_BLOCK_NUMBER;
     }
 
     /**
