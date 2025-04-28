@@ -2467,7 +2467,7 @@ describe("Get Order(s)", function () {
         await expect(ownerContract.getOrder(buyer, seller, 2)).to.be.revertedWith("Invalid order ID");
     });
 
-    it("Should allow a user to retrieve the total number of their orders in the role of a buyer", async function () {
+    it("Should allow a user to retrieve the total number of orders placed with a specific seller", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
@@ -2487,10 +2487,58 @@ describe("Get Order(s)", function () {
         await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get orders length
-        expect(await buyerContract.getBuyerOrdersLength()).to.equal(1);
+        expect(await buyerContract.getOrderCountFromSeller(seller)).to.equal(1);
     });
 
-    it("Should allow a user to retrieve the total number of their orders in the role of a seller", async function () {
+    it("Should allow a user to retrieve an order placed with a specific seller by index", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+        
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const buyer = accounts[1];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[2];
+        const sellerContract = contract.connect(seller);
+
+        // Buy
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
+
+        // Sell
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
+
+        const order = await buyerContract.getOrderAtIndexFromSeller(seller, 0);
+
+        expect(order.buyer).to.equal(buyer.address);
+        expect(order.seller).to.equal(seller.address);
+        expect(order.id).to.equal(0);
+    });
+
+    it("Should not allow a user to retrieve an order placed with a specific seller with an invalid index", async function () {
+        // Deploy a clean contract instance
+        const { contract } = await loadFixture(deployContractFixture);
+        
+        // Get available accounts
+        const accounts = await ethers.getSigners();
+
+        const buyer = accounts[1];
+        const buyerContract = contract.connect(buyer);
+
+        const seller = accounts[2];
+        const sellerContract = contract.connect(seller);
+
+        // Buy
+        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
+
+        // Sell
+        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
+
+        await expect(buyerContract.getOrderAtIndexFromSeller(seller, 1)).to.be.revertedWith("Invalid index");
+    });
+
+    it("Should allow a user to retrieve the total number of orders placed as a seller", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
@@ -2510,10 +2558,10 @@ describe("Get Order(s)", function () {
         await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get orders length
-        expect(await sellerContract.getSellerOrdersLength()).to.equal(1);
+        expect(await sellerContract.getOrderCountAsSeller()).to.equal(1);
     });
 
-    it("Should allow a user to retrieve an order by index in the role of a buyer", async function () {
+    it("Should allow a user to retrieve an order placed as a seller by index", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
@@ -2532,15 +2580,14 @@ describe("Get Order(s)", function () {
         // Sell
         await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
-        // Get order by index
-        const order = await buyerContract.getBuyerOrder(0);
+        const order = await sellerContract.getOrderAtIndexAsSeller(0);
 
         expect(order.buyer).to.equal(buyer.address);
         expect(order.seller).to.equal(seller.address);
         expect(order.id).to.equal(0);
     });
 
-    it("Should not allow a user to retrieve an order with an invalid index in the role of a buyer", async function () {
+    it("Should not allow a user to retrieve an order placed as a seller with an invalid index", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
@@ -2559,58 +2606,6 @@ describe("Get Order(s)", function () {
         // Sell
         await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
-        // Get order by index
-        await expect(buyerContract.getBuyerOrder(1)).to.be.revertedWith("Invalid index");
+        await expect(sellerContract.getOrderAtIndexAsSeller(1)).to.be.revertedWith("Invalid index");
     });
-
-    it("Should allow a user to retrieve an order by index in the role of a seller", async function () {
-        // Deploy a clean contract instance
-        const { contract } = await loadFixture(deployContractFixture);
-        
-        // Get available accounts
-        const accounts = await ethers.getSigners();
-
-        const buyer = accounts[1];
-        const buyerContract = contract.connect(buyer);
-
-        const seller = accounts[2];
-        const sellerContract = contract.connect(seller);
-
-        // Buy
-        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
-
-        // Sell
-        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
-
-        // Get order by index
-        const order = await sellerContract.getSellerOrder(0);
-
-        expect(order.buyer).to.equal(buyer.address);
-        expect(order.seller).to.equal(seller.address);
-        expect(order.id).to.equal(0);
-    });
-    
-    it("Should not allow a user to retrieve an order with an invalid index in the role of a seller", async function () {
-        // Deploy a clean contract instance
-        const { contract } = await loadFixture(deployContractFixture);
-        
-        // Get available accounts
-        const accounts = await ethers.getSigners();
-
-        const buyer = accounts[1];
-        const buyerContract = contract.connect(buyer);
-
-        const seller = accounts[2];
-        const sellerContract = contract.connect(seller);
-
-        // Buy
-        await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
-
-        // Sell
-        await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
-
-        // Get order by index
-        await expect(sellerContract.getSellerOrder(1)).to.be.revertedWith("Invalid index");
-    });
-
 });
