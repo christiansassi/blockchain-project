@@ -5,6 +5,8 @@
 contracts/cache
 contracts/.deps
 
+janus-sdk
+
 hardhat
 
 node_modules

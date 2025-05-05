@@ -36,6 +36,7 @@
     - [Best way to use the demo](#best-way-to-use-the-demo)
     - [Screenshots](#screenshots)
 - [Real World Applications](#real-world-applications)
+- [Future Work](#future-work)
 - [Contacts](#contacts)
 
 # What is Janus
@@ -252,7 +253,7 @@ While fixable, this issue is beyond the scope of this project, which is tailored
 
 # Real World Applications
 
-This project originated as a university assignment, and the behavior demonstrated in the demo differs significantly from what would occur in a real-world scenario.
+This project originated as a university assignment, and the behavior demonstrated in the demo differs significantly from what would occur in a real-world scenario. Especially since this demo comes with many constraints.
 
 In particular, deploying this smart contract on a public blockchain introduces an important consideration: the solution is fully decentralized. This means that no data is stored or managed by us—**all data resides solely on the blockchain**. While this decentralization brings many benefits (as outlined in the introduction), it also introduces some limitations.
 
@@ -268,7 +269,7 @@ import { Web3, WebSocketProvider } from 'web3';
 const WEBSOCKET_PROVIDER = "...";
 
 const CONTRACT_ADDRESS = "...";
-const ABI = "...";
+const ABI = [...];
 
 (async () => {
     const web3 = new Web3(
@@ -294,23 +295,58 @@ const ABI = "...";
 })();
 ```
 
+Below is a JavaScript snippet demonstrating how to fetch past [OrderPaid](https://github.com/christiansassi/blockchain-project/blob/main/contracts/events/Events.sol#L9) events. This can be useful if your implementation falls out of sync and misses some events.
+
+```JavaScript
+import { Web3, WebSocketProvider } from 'web3';
+
+const WEBSOCKET_PROVIDER = "...";
+
+const CONTRACT_ADDRESS = "...";
+const ABI = [...];
+
+(async () => {
+    const web3 = new Web3(
+        new WebSocketProvider(WEBSOCKET_PROVIDER)
+    );
+
+    const contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS);
+
+    // Define the block range
+    const fromBlock = await contract.methods.getCreationBlockNumber().call(); // or a specific block number
+    const toBlock = "latest";
+
+    // Fetch past OrderPaid events from creationBlock to latest
+    const pastEvents = await contract.getPastEvents("OrderPaid", {
+        fromBlock: fromBlock,
+        toBlock: toBlock
+    });
+
+    // Process past events
+    pastEvents.forEach(event => {
+        console.log(event); // Your logic here
+    });
+
+})();
+```
+
 Below is a Python snippet demonstrating how to set up an event listener for [OrderPaid](https://github.com/christiansassi/blockchain-project/blob/main/contracts/events/Events.sol#L9) using `web3.py`. For more information, refer to the official documentation [web3.py Subscriptions](https://web3py.readthedocs.io/en/stable/subscriptions.html).
 
 ```Python
 from web3 import Web3
 
-WEBSOCKET_PROVIDER = "..."
+HTTP_PROVIDER = "..."
 
 CONTRACT_ADDRESS = "..."
 ABI = [...]
 
-web3 = Web3(Web3.WebsocketProvider(WEBSOCKET_PROVIDER))
+web3 = Web3(Web3.HTTPProvider(HTTP_PROVIDER))
 
 def subscribe():
     contract = web3.eth.contract(address=CONTRACT_ADDRESS, abi=ABI)
 
     # Subscribe to the OrderPaid event
-    event_filter = contract.events.OrderPaid.createFilter(fromBlock="latest")
+    event_filter = contract.events.OrderPaid.create_filter(fromBlock="latest")
 
     # Process the event data whenever it's emitted
     while True:
@@ -320,6 +356,41 @@ def subscribe():
 # Start subscribing
 subscribe()
 ```
+
+Below is a Python snippet demonstrating how to fetch past [OrderPaid](https://github.com/christiansassi/blockchain-project/blob/main/contracts/events/Events.sol#L9) events. This can be useful if your implementation falls out of sync and misses some events.
+
+```Python
+from web3 import Web3
+
+HTTP_PROVIDER = "..."
+
+CONTRACT_ADDRESS = "..."
+ABI = [...]
+
+web3 = Web3(Web3.HTTPProvider(HTTP_PROVIDER))
+
+def fetch_past_events():
+    contract = web3.eth.contract(address=CONTRACT_ADDRESS, abi=ABI)
+    
+    # Define the block range
+    from_block = contract.functions.getCreationBlockNumber().call() # or a specific block number
+    to_block = "latest"
+
+    # Create filter for past events
+    events = contract.events.OrderPaid().get_logs(fromBlock=from_block, toBlock=to_block)
+
+    # Process past events
+    for event in events:
+        print(event)  # Your logic here
+
+# Fetch past events
+fetch_past_events()
+```
+
+# Future Work
+
+- Develop a JavaScript SDK to enable sellers to interact with the contract more easily and in a user-friendly way.
+- Extend the contract's functionality to support more sophisticated dynamics that are currently beyond the scope of the project. For example, implement rate limiting for users who request too many refunds, which could indicate malicious behavior.
 
 # Contacts
 
