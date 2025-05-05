@@ -393,7 +393,9 @@ fetch_past_events()
 # Future Work
 
 - Develop a JavaScript SDK to enable sellers to interact with the contract more easily and in a user-friendly way.
-- Extend the contract's functionality to support more sophisticated dynamics that are currently beyond the scope of the project. For example, implement rate limiting for users who request too many refunds, which could indicate malicious behavior.
+- Extend the contract's functionality to support more sophisticated dynamics that are currently beyond the scope of the project. For example:
+    - Implement rate limiting for users who request too many refunds, which could indicate malicious behavior.
+    - Accept only ETH or stablecoins as payment.
 
 # Contacts
 
