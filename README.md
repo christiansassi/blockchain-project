@@ -236,18 +236,21 @@ While fixable, this issue is beyond the scope of this project, which is tailored
 <div align="center">
     <p>
         <img width="100%" src="assets/demo/demo1.gif"/>
+        <i>Landing page</i>
     </p>
 </div>
 
 <div align="center">
     <p>
         <img width="100%" src="assets/demo/demo2.gif"/>
+        <i>Buyer</i>
     </p>
 </div>
 
 <div align="center">
     <p>
         <img width="100%" src="assets/demo/demo3.gif"/>
+        <i>Seller</i>
     </p>
 </div>
 
