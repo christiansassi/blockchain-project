@@ -112,6 +112,12 @@ First, clone this repository by running `git clone https://github.com/christians
    - **Chain ID**: `31337`
    - **Currency Symbol**: `ETH`
 
+> [!TIP]
+> If you left the Hardhat network selected in MetaMask, remember that if the node is not running and you reopen the wallet, it might take some time to load. 
+> This happens because MetaMask attempts to sync with the node, which fails since the node is offline. 
+> A simple workaround to avoid waiting for the synchronization timeout is to close MetaMask and reopen it. 
+> This will take you directly to the wallet's main window.
+
 To import an account into MetaMask, you need to run a local Hardhat node. You can do this by running `npx hardhat node` in the root directory either now or later when using the demo. In either case, you will see a terminal window like the one below:
 
 <div align="center">
