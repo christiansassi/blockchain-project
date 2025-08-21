@@ -398,10 +398,14 @@ fetch_past_events()
 
 # Future Work
 
-- Develop a JavaScript SDK to enable sellers to interact with the contract more easily and in a user-friendly way.
-- Extend the contract's functionality to support more sophisticated dynamics that are currently beyond the scope of the project. For example:
-    - Implement rate limiting for users who request too many refunds, which could indicate malicious behavior.
-    - Accept only ETH or stablecoins as payment.
+Several enhancements could be explored to improve Janus and expand its adoption:
+
+- **Reputation System**: Introduce a dual reputation mechanism for both sellers and buyers to increase trust and assist dispute resolvers in evaluating the reliability of each party, with safeguards against manipulation.  
+- **Secure Messaging**: Add an off-chain, encrypted, and anonymous messaging system to improve buyer–seller communication during disputes while preserving privacy.  
+- **Rate Limiting**: Implement mechanisms to prevent abuse of the refund process (e.g., spamming refund requests).  
+- **Upgradeable Contracts**: Adopt proxy-based upgradeability to allow the contract to evolve without redeployment or loss of state.  
+- **JavaScript SDK**: Provide a developer-friendly SDK to simplify integration into e-commerce platforms, similar to traditional payment services.  
+- **Stable Asset Support**: Limit accepted payment tokens to ETH and major stablecoins (e.g., USDC) to reduce exposure to volatility.  
 
 # Contacts
 
