@@ -176,6 +176,7 @@ describe("Pause / Unpause", function () {
 
         // Pause
         await expect(ownerContract.pause()).to.emit(ownerContract, PAUSED).withArgs(owner);
+        expect(await ownerContract.isPaused()).to.equal(true);
     });
 
     it("Should allow the owner to unpause the contract", async function () {
@@ -190,9 +191,11 @@ describe("Pause / Unpause", function () {
 
         // Pause
         await expect(ownerContract.pause()).to.emit(ownerContract, PAUSED).withArgs(owner);
+        await expect(await ownerContract.isPaused()).to.equal(true);
 
         // Unpause
         await expect(ownerContract.unpause()).to.emit(ownerContract, UNPAUSED).withArgs(owner);
+        await expect(await ownerContract.isPaused()).to.equal(false);
     });
 
     it("Should not allow the owner to pause the contract already paused", async function () {

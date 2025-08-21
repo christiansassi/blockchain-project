@@ -24,7 +24,7 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     uint32 private constant WARRANTY = 30 * 24 * 60 * 60; // 30 days
     uint256 private immutable CREATION_BLOCK_NUMBER;
 
-    bool private newOrderPaused = true;
+    bool private newOrderPaused = false;
 
     constructor() Ownable(msg.sender) {
         CREATION_BLOCK_NUMBER = block.number;
@@ -205,7 +205,7 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     */
     function buy(address seller, uint256 price) external payable whenNotPaused nonReentrant returns (address, address, uint256) {
 
-        require(newOrderPaused, "New orders cannot be created at this time.");
+        require(!newOrderPaused, "New orders cannot be created at this time.");
         require(msg.value == price, "Incorrect payment amount");
 
         uint256 id = _createOrder(msg.sender, seller, price);
@@ -222,7 +222,7 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
     */
     function sell(address buyer, uint256 id, uint256 price) external whenNotPaused nonReentrant returns (address, address, uint256) {
 
-        require(newOrderPaused, "New orders cannot be created at this time.");
+        require(!newOrderPaused, "New orders cannot be created at this time.");
 
         bytes32 key = _validateOrder(buyer, msg.sender, id);
 
@@ -276,8 +276,14 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
         order.status = OrderStatus.Completed;
         ordersList[msg.sender][order.id].status = OrderStatus.Completed;
 
-        payable(msg.sender).transfer(amount);
-        payable(owner()).transfer(fee);
+        // payable(msg.sender).transfer(amount);
+        // payable(owner()).transfer(fee);
+
+        (bool ok, ) = payable(msg.sender).call{value: amount}("");
+        require(ok, "Funds transfer failed");
+
+        (ok, ) = payable(owner()).call{value: fee}("");
+        require(ok, "Fee transfer failed");
 
         emit OrderWithdrawn(buyer, msg.sender, id);
         return (buyer, msg.sender, id);
@@ -303,7 +309,10 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
             order.status = OrderStatus.Completed;
             ordersList[seller][order.id].status = OrderStatus.Completed;
 
-            payable(msg.sender).transfer(order.price);
+            // payable(msg.sender).transfer(order.price);
+
+            (bool ok, ) = payable(msg.sender).call{value: order.price}("");
+            require(ok, "Funds transfer failed");
 
             emit RefundWithdrawn(msg.sender, seller, id);
             return (msg.sender, seller, id);
@@ -405,7 +414,9 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
         order.status = OrderStatus.Completed;
         ordersList[seller][order.id].status = OrderStatus.Completed;
 
-        payable(msg.sender).transfer(order.price);
+        //payable(msg.sender).transfer(order.price);
+        (bool ok, ) = payable(msg.sender).call{value: order.price}("");
+        require(ok, "Refund withdrawal failed");
 
         emit RefundWithdrawn(msg.sender, seller, id);
         return (msg.sender, seller, id);
