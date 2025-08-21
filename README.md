@@ -43,9 +43,9 @@
 
 ## Motivations
 
-Cryptocurrencies are increasingly used worldwide, but for many, this method of payment remains mysterious and, at times, unreliable—especially due to associations with the dark web and lack of oversight. Despite this, a growing number of legitimate businesses are adopting cryptocurrencies to reach new customer segments.
+Cryptocurrencies are increasingly used worldwide, but for many, this method of payment remains mysterious and, at times, unreliable, especially due to associations with the dark web and lack of oversight. Despite this, a growing number of legitimate businesses are adopting cryptocurrencies to reach new customer segments.
 
-However, there are still very few safeguards when using cryptocurrencies as a form of payment. Once funds are sent, they’re gone, and buyers must fully trust the seller’s integrity. As the internet has shown us time and again, that trust is not always justified—regardless of the payment method.
+However, there are still very few safeguards when using cryptocurrencies as a form of payment. Once funds are sent, they’re gone, and buyers must fully trust the seller’s integrity. As the internet has shown us time and again, that trust is not always justified, regardless of the payment method.
 
 This is where **Janus** comes in. Janus is a smart contract designed to offer **security and guarantees to buyers**, while helping **sellers build trust** with their customers and increase sales.
 
@@ -55,24 +55,24 @@ When a buyer wishes to purchase something using cryptocurrency, instead of sendi
 
 Once the payment is made, the **seller must confirm the order**. During this 30-day "warranty" period, if the buyer experiences any issues, they can request a refund. Janus then initiates an **anonymous communication process** between buyer and seller to gather details. Based on the outcome, the refund request is either approved or declined.
 
-- If **approved**, the buyer can withdraw their funds, minus network fees.
+- If **approved**, the buyer can withdraw their funds, minus network fees.  
 - If **declined**, or if no issue arises during the 30 days, the seller becomes eligible to withdraw the funds. In this case, a fixed fee of **1%** is applied.
 
-Of course, services similar to Janus already exist. However, most of them rely on **custodial wallets**, meaning a third-party entity holds your funds on your behalf. To create such a wallet, you're typically required to **verify your identity**, often by submitting official documents. As a result, in the event of a dispute, the details of your transaction—and potentially your personal information—may be shared with the service provider to assist in resolving the issue.
+Of course, services similar to Janus already exist. However, most of them rely on **custodial wallets**, meaning a third-party entity holds your funds on your behalf. To create such a wallet, you're typically required to **verify your identity**, often by submitting official documents. As a result, in the event of a dispute, the details of your transaction, and potentially your personal information, may be shared with the service provider to assist in resolving the issue.
 
 While this may help facilitate a resolution, it comes at a cost: it **compromises the core principle of anonymity** that cryptocurrencies were built upon.
 
-Janus takes a different approach. While the concept is similar—offering protection during transactions—we do **not require any form of identity verification**. You are identified solely by your **wallet address**. We have no access to your personal information, and any data you provide during a refund request **cannot be linked back to you**.
+Janus takes a different approach. While the concept is similar, offering protection during transactions, we do **not require any form of identity verification**. You are identified solely by your **wallet address**. We have no access to your personal information, and any data you provide during a refund request **cannot be linked back to you**.
 
 This allows you to enjoy the same level of **security and buyer protection**, while maintaining full control over your funds through **custodial and non-custodial wallets** (such as MetaMask).
 
 ## Why Janus?
 
-If you're wondering about the name, the answer is quite straightforward. In ancient Roman religion and mythology, **Janus** is the god of **beginnings**, symbolizing transitions and new ventures—much like the start of a transaction in our case.
+If you're wondering about the name, the answer is quite straightforward. In ancient Roman religion and mythology, **Janus** is the god of **beginnings**, symbolizing transitions and new ventures, much like the start of a transaction in our case.
 
 Janus is traditionally depicted with **two faces**, looking in opposite directions. For us, these faces represent the **buyer and the seller**, the two parties involved in every trade.
 
-The name also reflects a deeper message: the **end of uncertainty and conflict**—where buyers lacked guarantees and sellers struggled to build trust—and the **beginning of mutual trust and security**, with our system providing the protection both sides need.
+The name also reflects a deeper message: the **end of uncertainty and conflict**, where buyers lacked guarantees and sellers struggled to build trust, and the **beginning of mutual trust and security**, with our system providing the protection both sides need.
 
 **Ready to take the next step?**
 
