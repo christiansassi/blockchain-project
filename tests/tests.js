@@ -537,7 +537,7 @@ describe("Sell", function () {
         await expect(buyerContract.buy(seller, ETH, {"value": ETH})).to.emit(buyerContract, ORDER_PAID).withArgs(buyer, seller, 0);
 
         // Sell
-        await expect(sellerContract.sell(buyer, 2, ETH)).to.be.revertedWith("Invalid order ID");
+        await expect(sellerContract.sell(buyer, 2, ETH)).to.be.revertedWith("Order does not exists");
     });
 
     it("Should not allow a user to sell the same order more than once", async function () {
@@ -810,7 +810,7 @@ describe("Withdraw Order", function () {
         await expect(sellerContract.withdrawOrder(seller, 0)).to.be.revertedWith("Buyer and seller match");
     });
 
-    it("Should not allow a user to withdraw an order with an invalid order ID", async function () {
+    it("Should not allow a user to withdraw an order with an Order does not exists", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
@@ -834,7 +834,7 @@ describe("Withdraw Order", function () {
         await network.provider.send("evm_mine");
 
         // Withdraw order
-        await expect(sellerContract.withdrawOrder(buyer, 2)).to.be.revertedWith("Invalid order ID");
+        await expect(sellerContract.withdrawOrder(buyer, 2)).to.be.revertedWith("Order does not exists");
     });
 
     it("Should not allow a user to withdraw an order before the warranty period ends", async function () {
@@ -1051,7 +1051,7 @@ describe("Refund", function () {
         await expect(buyerContract.requestRefund(buyer, 0)).to.be.revertedWith("Buyer and seller match");
     });
 
-    it("Should not allow a user to request a refund with an invalid order ID", async function () {
+    it("Should not allow a user to request a refund with an Order does not exists", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
@@ -1071,7 +1071,7 @@ describe("Refund", function () {
         await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Request refund
-        await expect(buyerContract.requestRefund(seller, 2)).to.be.revertedWith("Invalid order ID");
+        await expect(buyerContract.requestRefund(seller, 2)).to.be.revertedWith("Order does not exists");
     });
 
     it("Should not allow a user to request a refund for an order that has not been accepted", async function () {
@@ -1641,7 +1641,7 @@ describe("Refund", function () {
         await expect(ownerContract.resolveRefund(seller, seller, 0, 6)).to.be.revertedWith("Buyer and seller match");
     });
 
-    it("Should not allow the owner to resolve a refund with an invalid order ID", async function () {
+    it("Should not allow the owner to resolve a refund with an Order does not exists", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
@@ -1667,8 +1667,8 @@ describe("Refund", function () {
         await expect(buyerContract.requestRefund(seller, 0)).to.emit(buyerContract, REFUND_REQUESTED).withArgs(buyer, seller, 0);
 
         // Resolve refund
-        await expect(ownerContract.resolveRefund(buyer, seller, 2, 5)).to.be.revertedWith("Invalid order ID");
-        await expect(ownerContract.resolveRefund(buyer, seller, 2, 6)).to.be.revertedWith("Invalid order ID");
+        await expect(ownerContract.resolveRefund(buyer, seller, 2, 5)).to.be.revertedWith("Order does not exists");
+        await expect(ownerContract.resolveRefund(buyer, seller, 2, 6)).to.be.revertedWith("Order does not exists");
     });
 
     it("Should not allow the owner to resolve a refund that does not exist", async function () {
@@ -1917,7 +1917,7 @@ describe("Refund", function () {
         await expect(buyerContract.withdrawRefund(buyer, 0)).to.be.revertedWith("Buyer and seller match");
     });
 
-    it("Should not allow a user to withdraw a refund with an invalid order ID", async function () {
+    it("Should not allow a user to withdraw a refund with an Order does not exists", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
@@ -1946,7 +1946,7 @@ describe("Refund", function () {
         await expect(ownerContract.resolveRefund(buyer, seller, 0, 5)).to.emit(ownerContract, REFUND_RESOLVED).withArgs(buyer, seller, 0, 5);
 
         // Withdraw refund
-        await expect(buyerContract.withdrawRefund(seller, 2)).to.be.revertedWith("Invalid order ID");
+        await expect(buyerContract.withdrawRefund(seller, 2)).to.be.revertedWith("Order does not exists");
     });
 
     it("Should not allow a user to withdraw a refund that does not exist", async function () {
@@ -2178,7 +2178,7 @@ describe("Get Order(s)", function () {
         await expect(buyerContract.getOrder(seller, seller, 0)).to.be.revertedWith("Buyer and seller match");
     });
 
-    it("Should not allow a user to retrieve an order in the role of a buyer with an invalid order ID", async function () {
+    it("Should not allow a user to retrieve an order in the role of a buyer with an Order does not exists", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
@@ -2198,7 +2198,7 @@ describe("Get Order(s)", function () {
         await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
-        await expect(buyerContract.getOrder(buyer, seller, 2)).to.be.revertedWith("Invalid order ID");
+        await expect(buyerContract.getOrder(buyer, seller, 2)).to.be.revertedWith("Order does not exists");
     });
 
     it("Should not allow a user to retrieve an order they are not involved in", async function () {
@@ -2323,7 +2323,7 @@ describe("Get Order(s)", function () {
         await expect(sellerContract.getOrder(seller, seller, 0)).to.be.revertedWith("Buyer and seller match");
     });
 
-    it("Should not allow a user to retrieve an order in the role of a seller with an invalid order ID", async function () {
+    it("Should not allow a user to retrieve an order in the role of a seller with an Order does not exists", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
@@ -2343,7 +2343,7 @@ describe("Get Order(s)", function () {
         await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
-        await expect(sellerContract.getOrder(buyer, seller, 2)).to.be.revertedWith("Invalid order ID");
+        await expect(sellerContract.getOrder(buyer, seller, 2)).to.be.revertedWith("Order does not exists");
     });
 
     it("Should allow the owner to retrieve any order", async function () {
@@ -2454,7 +2454,7 @@ describe("Get Order(s)", function () {
         await expect(ownerContract.getOrder(seller, seller, 0)).to.be.revertedWith("Buyer and seller match");
     });
 
-    it("Should not allow the owner to retrieve an order with an invalid order ID", async function () {
+    it("Should not allow the owner to retrieve an order with an Order does not exists", async function () {
         // Deploy a clean contract instance
         const { contract } = await loadFixture(deployContractFixture);
         
@@ -2477,7 +2477,7 @@ describe("Get Order(s)", function () {
         await expect(sellerContract.sell(buyer, 0, ETH)).to.emit(sellerContract, ORDER_ACCEPTED).withArgs(buyer, seller, 0);
 
         // Get order
-        await expect(ownerContract.getOrder(buyer, seller, 2)).to.be.revertedWith("Invalid order ID");
+        await expect(ownerContract.getOrder(buyer, seller, 2)).to.be.revertedWith("Order does not exists");
     });
 
     it("Should allow a user to retrieve the total number of orders placed with a specific seller", async function () {
