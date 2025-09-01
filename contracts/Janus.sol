@@ -189,7 +189,7 @@ contract Janus is Ownable, Pausable, ReentrancyGuard, Events {
         require(buyer != address(0), "Invalid buyer address");
         require(seller != address(0), "Invalid seller address");
         require(buyer != seller, "Buyer and seller match");
-        require(id < orders[seller][buyer].length, "Invalid order ID");
+        // require(id < orders[seller][buyer].length, "Invalid order ID");
 
         bytes32 key = _genKey(buyer, seller, id);
 
